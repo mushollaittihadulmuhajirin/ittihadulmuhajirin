@@ -1,3 +1,4 @@
+require("dotenv").config();
 const session = require("express-session");
 const laporanRoute = require("./routes/laporan");
 const express = require("express");
