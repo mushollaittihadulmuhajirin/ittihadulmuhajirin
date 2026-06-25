@@ -2,10 +2,9 @@ const express = require("express");
 const router = express.Router();
 
 const db = require("../config/db");
-
 const ExcelJS = require("exceljs");
 const PDFDocument = require("pdfkit");
-
+const { ChartJSNodeCanvas } = require("chartjs-node-canvas");
 
 // ====================
 // HALAMAN LAPORAN
@@ -13,8 +12,7 @@ const PDFDocument = require("pdfkit");
 
 router.get("/", (req, res) => {
 
-    db.query(
-        `
+    db.query(`
         SELECT
         transaksi.*,
         kategori.nama AS kategori_nama,
@@ -30,50 +28,47 @@ router.get("/", (req, res) => {
         ON transaksi.rekening_id = rekening.id
 
         ORDER BY transaksi.id DESC
-        `,
-        (err, rows) => {
+    `, (err, rows) => {
 
-            if (err) {
-                console.log(err);
-                return res.send("Error Laporan");
+        if (err) {
+            console.log(err);
+            return res.send("Error Laporan");
+        }
+
+        let masuk = 0;
+        let keluar = 0;
+
+        rows.forEach(item => {
+
+            if (item.jenis === "masuk") {
+                masuk += Number(item.nominal);
             }
 
-            let masuk = 0;
-            let keluar = 0;
+            if (item.jenis === "keluar") {
+                keluar += Number(item.nominal);
+            }
 
-            rows.forEach(item => {
+        });
 
-                if (item.jenis === "masuk") {
-                    masuk += Number(item.nominal);
-                }
+        res.render("laporan", {
+            data: rows,
+            masuk,
+            keluar,
+            saldo: masuk - keluar
+        });
 
-                if (item.jenis === "keluar") {
-                    keluar += Number(item.nominal);
-                }
-
-            });
-
-            res.render("laporan", {
-                data: rows,
-                masuk,
-                keluar,
-                saldo: masuk - keluar
-            });
-
-        }
-    );
+    });
 
 });
-
 
 // ====================
 // EXPORT EXCEL
 // ====================
 
 router.get("/excel", async (req, res) => {
+    console.log("=== EXPORT EXCEL DIKLIK ===");
 
-    db.query(
-        `
+    db.query(`
         SELECT
         transaksi.*,
         kategori.nama AS kategori_nama
@@ -84,68 +79,152 @@ router.get("/excel", async (req, res) => {
         ON transaksi.kategori_id = kategori.id
 
         ORDER BY transaksi.id DESC
-        `,
-        async (err, rows) => {
+    `, async (err, rows) => {
 
-            if (err) {
-                console.log(err);
-                return res.send("Error Export Excel");
+        if (err) {
+            console.log(err);
+            return res.send("Error Export Excel");
+        }
+
+        let masuk = 0;
+        let keluar = 0;
+
+        rows.forEach(item => {
+
+            if (item.jenis === "masuk") {
+                masuk += Number(item.nominal);
             }
 
-            const workbook = new ExcelJS.Workbook();
+            if (item.jenis === "keluar") {
+                keluar += Number(item.nominal);
+            }
 
-            const worksheet = workbook.addWorksheet("Laporan");
+        });
 
-            worksheet.columns = [
-                { header: "Tanggal", key: "tanggal", width: 20 },
-                { header: "Kategori", key: "kategori", width: 25 },
-                { header: "Jenis", key: "jenis", width: 15 },
-                { header: "Metode", key: "metode", width: 20 },
-                { header: "Nominal", key: "nominal", width: 20 },
-                { header: "Keterangan", key: "keterangan", width: 40 }
-            ];
+        const saldo = masuk - keluar;
 
-            rows.forEach(item => {
+        // ==========================
+        // Buat Workbook
+        // ==========================
 
-                worksheet.addRow({
-                    tanggal: new Date(item.tanggal).toLocaleDateString("id-ID"),
-                    kategori: item.kategori_nama,
-                    jenis: item.jenis,
-                    metode: item.metode,
-                    nominal: item.nominal,
-                    keterangan: item.keterangan
-                });
+        const workbook = new ExcelJS.Workbook();
 
+        // ==========================
+        // Sheet Data
+        // ==========================
+
+        const worksheet = workbook.addWorksheet("Laporan");
+
+        worksheet.columns = [
+            { header: "Tanggal", key: "tanggal", width: 20 },
+            { header: "Kategori", key: "kategori", width: 25 },
+            { header: "Jenis", key: "jenis", width: 15 },
+            { header: "Metode", key: "metode", width: 20 },
+            { header: "Nominal", key: "nominal", width: 20 },
+            { header: "Keterangan", key: "keterangan", width: 40 }
+        ];
+
+        rows.forEach(item => {
+
+            worksheet.addRow({
+                tanggal: new Date(item.tanggal).toLocaleDateString("id-ID"),
+                kategori: item.kategori_nama,
+                jenis: item.jenis,
+                metode: item.metode,
+                nominal: item.nominal,
+                keterangan: item.keterangan
             });
 
-            res.setHeader(
-                "Content-Type",
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            );
+        });
 
-            res.setHeader(
-                "Content-Disposition",
-                "attachment; filename=LaporanKeuangan.xlsx"
-            );
+        // ==========================
+        // Buat Grafik PNG
+        // ==========================
 
-            await workbook.xlsx.write(res);
+        const chartJSNodeCanvas =
+            new ChartJSNodeCanvas({
+                width: 800,
+                height: 400
+            });
 
-            res.end();
+        const imageBuffer =
+            await chartJSNodeCanvas.renderToBuffer({
+                type: "bar",
+                data: {
+                    labels: [
+                        "Pemasukan",
+                        "Pengeluaran",
+                        "Saldo"
+                    ],
+                    datasets: [{
+                        label: "Keuangan Masjid",
+                        data: [
+                            masuk,
+                            keluar,
+                            saldo
+                        ],
+                        backgroundColor: [
+                            "#198754",
+                            "#dc3545",
+                            "#0d6efd"
+                        ]
+                    }]
+                }
+            });
 
-        }
-    );
+        // ==========================
+        // Sheet Grafik
+        // ==========================
+console.log("MEMBUAT SHEET GRAFIK");
+        const grafikSheet =
+            workbook.addWorksheet("Grafik");
+
+        grafikSheet.getCell("A1").value =
+            "Grafik Keuangan Masjid";
+
+        grafikSheet.getCell("A1").font = {
+            bold: true,
+            size: 16
+        };
+
+        const imageId = workbook.addImage({
+            buffer: imageBuffer,
+            extension: "png"
+        });
+
+        grafikSheet.addImage(imageId, {
+            tl: { col: 0, row: 2 },
+            ext: { width: 700, height: 350 }
+        });
+console.log("GAMBAR BERHASIL DITAMBAHKAN");
+        // ==========================
+        // Download
+        // ==========================
+
+        res.setHeader(
+            "Content-Type",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        );
+
+        res.setHeader(
+            "Content-Disposition",
+            "attachment; filename=LaporanKeuangan.xlsx"
+        );
+
+        await workbook.xlsx.write(res);
+
+        res.end();
+
+    });
 
 });
-
-
 // ====================
-// EXPORT PDF
+// EXPORT PDF + CHART
 // ====================
 
-router.get("/pdf", (req, res) => {
+router.get("/pdf", async (req, res) => {
 
-    db.query(
-        `
+    db.query(`
         SELECT
         transaksi.*,
         kategori.nama AS kategori_nama
@@ -156,52 +235,102 @@ router.get("/pdf", (req, res) => {
         ON transaksi.kategori_id = kategori.id
 
         ORDER BY transaksi.id DESC
-        `,
-        (err, rows) => {
+    `, async (err, rows) => {
 
-            if (err) {
-                console.log(err);
-                return res.send("Error Export PDF");
+        if (err) {
+            console.log(err);
+            return res.send("Error Export PDF");
+        }
+
+        let masuk = 0;
+        let keluar = 0;
+
+        rows.forEach(item => {
+
+            if (item.jenis === "masuk") {
+                masuk += Number(item.nominal);
             }
 
-            const doc = new PDFDocument({
-                margin: 30
+            if (item.jenis === "keluar") {
+                keluar += Number(item.nominal);
+            }
+
+        });
+
+        const saldo = masuk - keluar;
+
+        const chartJSNodeCanvas = new ChartJSNodeCanvas({
+            width: 800,
+            height: 400
+        });
+
+        const imageBuffer = await chartJSNodeCanvas.renderToBuffer({
+            type: "bar",
+            data: {
+                labels: ["Pemasukan", "Pengeluaran", "Saldo"],
+                datasets: [{
+                    data: [masuk, keluar, saldo],
+                    backgroundColor: [
+                        "#198754",
+                        "#dc3545",
+                        "#0d6efd"
+                    ]
+                }]
+            }
+        });
+
+        res.setHeader("Content-Type", "application/pdf");
+
+        res.setHeader(
+            "Content-Disposition",
+            "attachment; filename=LaporanKeuangan.pdf"
+        );
+
+        const doc = new PDFDocument({
+            margin: 30
+        });
+
+        doc.pipe(res);
+
+        doc.fontSize(18)
+            .text("DKM ITTIHADUL MUHAJIRIN", {
+                align: "center"
             });
 
-            res.setHeader(
-                "Content-Type",
-                "application/pdf"
+        doc.moveDown();
+
+        doc.fontSize(12)
+            .text(`Total Masuk : Rp ${masuk.toLocaleString("id-ID")}`);
+
+        doc.text(`Total Keluar : Rp ${keluar.toLocaleString("id-ID")}`);
+
+        doc.text(`Saldo : Rp ${saldo.toLocaleString("id-ID")}`);
+
+        doc.moveDown();
+
+        doc.image(imageBuffer, {
+            fit: [500, 250],
+            align: "center"
+        });
+
+        doc.moveDown();
+
+        doc.fontSize(14)
+            .text("Daftar Transaksi");
+
+        doc.moveDown();
+
+        rows.forEach(item => {
+
+            doc.fontSize(10).text(
+                `${new Date(item.tanggal).toLocaleDateString("id-ID")} | ${item.kategori_nama} | ${item.jenis} | Rp ${Number(item.nominal).toLocaleString("id-ID")}`
             );
 
-            res.setHeader(
-                "Content-Disposition",
-                "attachment; filename=LaporanKeuangan.pdf"
-            );
+        });
 
-            doc.pipe(res);
+        doc.end();
 
-            doc.fontSize(18)
-               .text("Laporan Keuangan DKM Ittihadul Muhajirin");
-
-            doc.moveDown();
-
-            rows.forEach(item => {
-
-                doc
-                .fontSize(10)
-                .text(
-                    `${new Date(item.tanggal).toLocaleDateString("id-ID")} | ` +
-                    `${item.kategori_nama} | ` +
-                    `${item.jenis} | ` +
-                    `Rp ${Number(item.nominal).toLocaleString("id-ID")}`
-                );
-
-            });
-
-            doc.end();
-
-        }
-    );
+    });
 
 });
 
