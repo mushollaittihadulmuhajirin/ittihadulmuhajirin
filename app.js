@@ -38,11 +38,6 @@ app.get("/test", (req, res) => {
     res.send("TEST BERHASIL");
 });
 
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-    console.log("Server berjalan di port " + PORT);
-});
 app.get("/dbtest", (req, res) => {
 
     db.query("SELECT 1 AS test", (err, rows) => {
@@ -55,4 +50,10 @@ app.get("/dbtest", (req, res) => {
         res.send("DB BERHASIL");
     });
 
+});
+
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+    console.log("Server berjalan di port " + PORT);
 });
