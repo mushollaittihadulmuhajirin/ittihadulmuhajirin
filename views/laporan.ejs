@@ -277,6 +277,15 @@ new Chart(ctx, {
     }
 });
 
+tr.pemasukan{
+    background:#e8f5e9;
+}
+
+tr.pengeluaran{
+    background:#ffebee;
+}
+
+<tr class="<%= item.jenis.toLowerCase() === 'masuk' ? 'pemasukan' : 'pengeluaran' %>">
 </script>
 
 </body>
