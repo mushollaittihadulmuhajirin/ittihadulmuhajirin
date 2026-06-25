@@ -1,3 +1,6 @@
+console.log("HOST:", process.env.DB_HOST);
+console.log("DB:", process.env.DB_NAME);
+
 const express = require("express");
 const router = express.Router();
 
