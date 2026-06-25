@@ -9,6 +9,9 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
 <style>
 
 body{
@@ -116,6 +119,28 @@ Rp <%= Number(saldo).toLocaleString('id-ID') %>
 <br>
 
 <div class="card p-3 bg-white">
+
+<<div class="card p-3 bg-white">
+
+<div class="d-flex justify-content-end mb-3">
+
+<a href="/laporan/pdf"
+class="btn btn-danger me-2"
+title="Export PDF">
+
+<i class="fa-solid fa-file-pdf"></i>
+
+</a>
+
+<a href="/laporan/excel"
+class="btn btn-success"
+title="Export Excel">
+
+<i class="fa-solid fa-file-excel"></i>
+
+</a>
+
+</div>
 
 <div class="table-responsive">
 
