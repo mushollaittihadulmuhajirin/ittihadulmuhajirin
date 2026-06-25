@@ -43,3 +43,16 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log("Server berjalan di port " + PORT);
 });
+app.get("/dbtest", (req, res) => {
+
+    db.query("SELECT 1 AS test", (err, rows) => {
+
+        if (err) {
+            console.log(err);
+            return res.send("DB GAGAL");
+        }
+
+        res.send("DB BERHASIL");
+    });
+
+});
