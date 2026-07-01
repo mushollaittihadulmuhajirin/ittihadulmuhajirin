@@ -1,0 +1,750 @@
+/* ===========================================================
+   DKM CRYSTAL V2
+   Global Theme
+=========================================================== */
+
+:root{
+
+    --primary:#198754;
+    --primary-dark:#146c43;
+
+    --secondary:#0d6efd;
+
+    --danger:#dc3545;
+
+    --warning:#ffc107;
+
+    --light:#f5f7fb;
+
+    --white:#ffffff;
+
+    --border:#e5e7eb;
+
+    --text:#343a40;
+
+    --muted:#6c757d;
+
+    --radius:14px;
+
+    --shadow:0 8px 24px rgba(0,0,0,.08);
+
+    --transition:.25s;
+
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+
+    font-family:'Poppins',sans-serif;
+
+    background:var(--light);
+
+    color:var(--text);
+
+    min-height:100vh;
+
+}
+
+/* ===========================================================
+   NAVBAR
+=========================================================== */
+
+.navbar{
+
+    background:linear-gradient(90deg,#198754,#157347)!important;
+
+    box-shadow:0 3px 12px rgba(0,0,0,.15);
+
+}
+
+.navbar-brand{
+
+    font-size:22px;
+
+    font-weight:700;
+
+}
+
+.nav-link{
+
+    color:#fff!important;
+
+    font-weight:500;
+
+    transition:var(--transition);
+
+    border-radius:8px;
+
+    padding:8px 14px!important;
+
+}
+
+.nav-link:hover{
+
+    background:rgba(255,255,255,.18);
+
+}
+
+/* ===========================================================
+   PAGE TITLE
+=========================================================== */
+
+.page-header{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    margin-bottom:25px;
+
+}
+
+.dashboard-title{
+
+    font-size:30px;
+
+    font-weight:700;
+
+    color:#198754;
+
+}
+
+/* ===========================================================
+   CARD
+=========================================================== */
+
+.card{
+
+    border:none;
+
+    border-radius:var(--radius);
+
+    box-shadow:var(--shadow);
+
+    overflow:hidden;
+
+}
+
+.card-header{
+
+    font-weight:600;
+
+}
+
+.card-body{
+
+    padding:22px;
+
+}
+
+/* ===========================================================
+   CUSTOM CARD
+=========================================================== */
+
+.shadow-soft{
+
+    border-radius:var(--radius);
+
+    box-shadow:var(--shadow);
+
+    background:#fff;
+
+}
+
+/* ===========================================================
+   BUTTON
+=========================================================== */
+
+.btn{
+
+    border-radius:10px;
+
+    padding:10px 18px;
+
+    font-weight:600;
+
+    transition:.25s;
+
+}
+
+.btn-success{
+
+    background:#198754;
+
+    border:none;
+
+}
+
+.btn-success:hover{
+
+    background:#157347;
+
+}
+
+.btn-primary{
+
+    border:none;
+
+}
+
+.btn-danger{
+
+    border:none;
+
+}
+
+.btn-warning{
+
+    color:#fff;
+
+}
+
+/* ===========================================================
+   FORM
+=========================================================== */
+
+.form-control,
+
+.form-select{
+
+    border-radius:10px;
+
+    min-height:46px;
+
+    border:1px solid #dee2e6;
+
+}
+
+.form-control:focus,
+
+.form-select:focus{
+
+    border-color:#198754;
+
+    box-shadow:0 0 0 .2rem rgba(25,135,84,.15);
+
+}
+
+/* ===========================================================
+   TABLE
+=========================================================== */
+
+.table{
+
+    margin-bottom:0;
+
+}
+
+.table thead{
+
+    background:#198754;
+
+    color:#fff;
+
+}
+
+.table thead th{
+
+    border:none;
+
+    white-space:nowrap;
+
+}
+
+.table td{
+
+    vertical-align:middle;
+
+}
+
+.table tbody tr{
+
+    transition:.2s;
+
+}
+
+.table tbody tr:hover{
+
+    background:#f8f9fa;
+
+}
+.table tbody tr{
+
+transition:.25s;
+
+}
+
+.table tbody tr:hover{
+
+transform:scale(1.01);
+
+box-shadow:0 4px 10px rgba(0,0,0,.08);
+
+}
+
+/* ===========================================================
+   BADGE
+=========================================================== */
+
+.badge{
+
+    padding:8px 12px;
+
+    border-radius:8px;
+
+    font-size:13px;
+
+}
+
+/* ===========================================================
+   INFO CARD
+=========================================================== */
+
+.info-card{
+
+    background:#fff;
+
+    border-radius:16px;
+
+    box-shadow:var(--shadow);
+
+    padding:25px;
+
+    text-align:center;
+
+    transition:.25s;
+
+}
+
+.info-card:hover{
+
+    transform:translateY(-4px);
+
+}
+
+.info-card h6{
+
+    color:#6c757d;
+
+    margin-bottom:10px;
+
+}
+
+.info-card h3{
+
+    font-size:30px;
+
+    font-weight:700;
+
+}
+
+/* ===========================================================
+   FOOTER
+=========================================================== */
+
+.footer{
+
+    margin-top:50px;
+
+    padding:30px;
+
+    background:#fff;
+
+    border-top:1px solid #e9ecef;
+
+    text-align:center;
+
+    color:#6c757d;
+
+}
+
+/* ===========================================================
+   DASHBOARD CARD COLOR
+=========================================================== */
+
+.bg-income{
+
+    background:#198754;
+
+    color:#fff;
+
+}
+
+.bg-expense{
+
+    background:#dc3545;
+
+    color:#fff;
+
+}
+
+.bg-balance{
+
+    background:#0d6efd;
+
+    color:#fff;
+
+}
+
+/* ===========================================================
+   RESPONSIVE
+=========================================================== */
+
+@media(max-width:768px){
+
+.dashboard-title{
+
+font-size:24px;
+
+}
+
+.page-header{
+
+flex-direction:column;
+
+align-items:flex-start;
+
+gap:10px;
+
+}
+
+.card-body{
+
+padding:16px;
+
+}
+
+.btn{
+
+width:100%;
+
+margin-bottom:8px;
+
+}
+
+.table{
+
+font-size:13px;
+
+}
+
+}
+/* ================================
+MENU CEPAT DASHBOARD
+================================ */
+
+.quick-card{
+
+border-radius:18px;
+
+padding:30px;
+
+color:#fff;
+
+text-align:center;
+
+transition:.25s;
+
+box-shadow:0 10px 20px rgba(0,0,0,.12);
+
+}
+
+.quick-card:hover{
+
+transform:translateY(-6px);
+
+}
+
+.quick-icon{
+
+font-size:42px;
+
+margin-bottom:15px;
+
+}
+
+.quick-card h5{
+
+font-weight:700;
+
+margin-bottom:8px;
+
+}
+
+.quick-card p{
+
+margin:0;
+
+opacity:.9;
+
+font-size:14px;
+
+}
+
+.quick-green{
+
+background:linear-gradient(135deg,#198754,#20c997);
+
+}
+
+.quick-orange{
+
+background:linear-gradient(135deg,#fd7e14,#ffc107);
+
+}
+
+.quick-blue{
+
+background:linear-gradient(135deg,#0d6efd,#4dabf7);
+
+}
+
+.quick-purple{
+
+background:linear-gradient(135deg,#6f42c1,#9775fa);
+
+}
+/* ===================================
+   DASHBOARD COLOR CARDS
+=================================== */
+
+.info-card{
+    border-radius:18px;
+    padding:25px;
+    color:#fff;
+    position:relative;
+    overflow:hidden;
+    transition:.3s;
+    box-shadow:0 10px 30px rgba(0,0,0,.12);
+}
+
+.info-card:hover{
+    transform:translateY(-6px);
+}
+
+.info-card h5{
+    font-size:15px;
+    opacity:.95;
+    margin-bottom:8px;
+}
+
+.info-card h2{
+    font-size:32px;
+    font-weight:700;
+}
+
+.big-icon{
+    position:absolute;
+    right:20px;
+    top:15px;
+    font-size:50px;
+    opacity:.18;
+}
+
+/* =======================
+WARNA CARD
+======================= */
+
+.bg-saldo{
+    background:linear-gradient(135deg,#2563eb,#1d4ed8);
+}
+
+.bg-masuk{
+    background:linear-gradient(135deg,#16a34a,#15803d);
+}
+
+.bg-keluar{
+    background:linear-gradient(135deg,#dc2626,#b91c1c);
+}
+
+.bg-aset{
+    background:linear-gradient(135deg,#f59e0b,#d97706);
+}
+
+.bg-donasi{
+    background:linear-gradient(135deg,#8b5cf6,#7c3aed);
+}
+
+.bg-inventaris{
+    background:linear-gradient(135deg,#0ea5e9,#0284c7);
+}
+/* ==========================
+   QUICK MENU MODERN
+========================== */
+
+.quick-card{
+    display:block;
+    text-decoration:none;
+    border-radius:18px;
+    color:#fff;
+    padding:25px;
+    transition:.3s;
+    box-shadow:0 10px 25px rgba(0,0,0,.08);
+    height:170px;
+    position:relative;
+    overflow:hidden;
+}
+
+.quick-card:hover{
+    transform:translateY(-8px);
+    color:#fff;
+    text-decoration:none;
+}
+
+.quick-card .icon{
+    font-size:45px;
+    margin-bottom:15px;
+}
+
+.quick-card h4{
+    font-weight:700;
+    margin-bottom:5px;
+}
+
+.quick-card p{
+    opacity:.9;
+    margin:0;
+    font-size:14px;
+}
+
+.quick-transaksi{
+    background:linear-gradient(135deg,#16a34a,#22c55e);
+}
+
+.quick-aset{
+    background:linear-gradient(135deg,#f59e0b,#fbbf24);
+}
+
+.quick-laporan{
+    background:linear-gradient(135deg,#2563eb,#3b82f6);
+}
+
+.quick-rekening{
+    background:linear-gradient(135deg,#6d28d9,#8b5cf6);
+}
+/* ===================================
+SUMMARY CARD MODERN
+=================================== */
+
+.modern-card{
+
+background:#fff;
+
+border-radius:18px;
+
+padding:28px;
+
+box-shadow:0 10px 30px rgba(0,0,0,.08);
+
+transition:.3s;
+
+}
+
+.modern-card:hover{
+
+transform:translateY(-6px);
+
+box-shadow:0 18px 40px rgba(0,0,0,.12);
+
+}
+
+.summary-item{
+
+display:flex;
+
+justify-content:space-between;
+
+align-items:center;
+
+}
+
+.summary-label{
+
+font-size:14px;
+
+color:#777;
+
+margin-bottom:6px;
+
+}
+
+.summary-value{
+
+font-size:24px;
+
+font-weight:700;
+
+}
+
+.summary-icon{
+
+width:58px;
+
+height:58px;
+
+border-radius:50%;
+
+display:flex;
+
+align-items:center;
+
+justify-content:center;
+
+font-size:24px;
+
+color:white;
+
+}
+
+hr{
+
+margin:18px 0;
+
+}
+.bg-warning{
+
+background:#ffc107;
+
+color:#222;
+
+}
+
+.summary-card h4{
+
+font-weight:700;
+
+margin-bottom:20px;
+
+}
+/* ==========================
+AKTIVITAS TERBARU
+========================== */
+
+.table-hover tbody tr{
+
+transition:.25s;
+
+}
+
+.table-hover tbody tr:hover{
+
+background:#eef7ff;
+
+}
+
+.badge{
+
+padding:8px 14px;
+
+border-radius:20px;
+
+font-size:12px;
+
+}

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+
+<html> <head> <title>Inventaris Aset Masjid</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<style>
+    body{
+        background:#f5f6fa;
+    }
+
+    .card{
+        border:none;
+        border-radius:15px;
+        box-shadow:0 2px 10px rgba(0,0,0,.08);
+    }
+
+    h2{
+        font-weight:bold;
+    }
+
+    .table{
+        white-space: nowrap;
+    }
+</style>
+
+</head> <body>
+
+<div class="container py-3">
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>📦 Inventaris Aset Masjid</h2>
+
+    <a href="/dashboard" class="btn btn-secondary">
+        Kembali
+    </a>
+</div>
+
+<div class="card p-3 mb-4">
+
+    <h5 class="mb-3">Tambah Aset</h5>
+
+    <form action="/aset/tambah" method="POST">
+
+        <div class="row g-2">
+
+            <div class="col-12 col-md-6">
+                <input
+                    class="form-control"
+                    name="nama_aset"
+                    placeholder="Nama Aset"
+                    required>
+            </div>
+
+            <div class="col-6 col-md-3">
+                <input
+                    class="form-control"
+                    name="kategori"
+                    placeholder="Kategori">
+            </div>
+
+            <div class="col-6 col-md-3">
+                <input
+                    type="number"
+                    class="form-control"
+                    name="jumlah"
+                    placeholder="Jumlah">
+            </div>
+
+            <div class="col-6 col-md-3">
+                <input
+                    class="form-control"
+                    name="kondisi"
+                    placeholder="Kondisi">
+            </div>
+
+            <div class="col-6 col-md-3">
+                <input
+                    class="form-control"
+                    name="sumber"
+                    placeholder="Sumber">
+            </div>
+
+            <div class="col-12 col-md-3">
+                <input
+                    type="date"
+                    class="form-control"
+                    name="tanggal_masuk">
+            </div>
+
+            <div class="col-12 col-md-3">
+                <input
+                    type="number"
+                    class="form-control"
+                    name="nilai_estimasi"
+                    placeholder="Nilai Estimasi">
+            </div>
+
+            <div class="col-12">
+                <textarea
+                    class="form-control"
+                    rows="2"
+                    name="keterangan"
+                    placeholder="Keterangan"></textarea>
+            </div>
+
+            <div class="col-12">
+                <button class="btn btn-success">
+                    Simpan Aset
+                </button>
+            </div>
+
+        </div>
+
+    </form>
+
+</div>
+
+<div class="card p-3">
+
+    <h5 class="mb-3">Daftar Aset</h5>
+
+    <div class="table-responsive">
+
+        <table class="table table-bordered table-striped">
+
+            <thead class="table-success">
+                <tr>
+                    <th>Nama</th>
+                    <th>Kategori</th>
+                    <th>Jumlah</th>
+                    <th>Kondisi</th>
+                    <th>Sumber</th>
+                    <th>Tanggal</th>
+                    <th>Nilai</th>
+                    <th>Keterangan</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+            <% data.forEach(item => { %>
+
+                <tr>
+                    <td><%= item.nama_aset %></td>
+                    <td><%= item.kategori %></td>
+                    <td><%= item.jumlah %></td>
+                    <td><%= item.kondisi %></td>
+                    <td><%= item.sumber %></td>
+                    <td><%= item.tanggal_masuk ? new Date(item.tanggal_masuk).toLocaleDateString('id-ID') : '' %></td>
+                    <td>
+                        Rp
+                        <%= Number(item.nilai_estimasi || 0).toLocaleString('id-ID') %>
+                    </td>
+                    <td><%= item.keterangan %></td>
+                </tr>
+
+            <% }) %>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+</div>
+
+</body> </html>

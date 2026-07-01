@@ -27,19 +27,20 @@ router.get("/", (req,res)=>{
 
 
 // simpan kategori
-router.post("/simpan",(req,res)=>{
+router.post("/simpan", (req, res) => {
 
-    const {nama} = req.body;
+    console.log("BODY :", req.body);
 
+    const { nama, tipe } = req.body;
 
     db.query(
-        "INSERT INTO kategori (nama) VALUES (?)",
-        [nama],
-        (err)=>{
+        "INSERT INTO kategori (nama, tipe) VALUES (?, ?)",
+        [nama, tipe],
+        (err) => {
 
-            if(err){
+            if (err) {
                 console.log(err);
-                return res.send("Gagal Simpan");
+                return res.send(err.sqlMessage);
             }
 
             res.redirect("/kategori");

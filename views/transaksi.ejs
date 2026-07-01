@@ -1,136 +1,339 @@
-<!DOCTYPE html>
-<html>
-<head>
+<%- include("partials/header",{title:"Transaksi DKM"}) %>
 
-<title>Transaksi DKM</title>
+<%- include("partials/navbar") %>
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
 
-</head>
+.page-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:25px;
+}
 
-<body>
+.dashboard-title{
+    font-weight:700;
+}
 
-<div class="container mt-4">
+.shadow-soft{
+    border:none;
+    border-radius:15px;
+    box-shadow:0 5px 18px rgba(0,0,0,.08);
+}
 
-<h2>Input Transaksi</h2>
-<div class="mb-3">
+.form-section{
+    display:none;
+}
 
-    <a href="/dashboard" class="btn btn-dark">
-📈 Dashboard
-</a>
+.table td{
+    vertical-align:middle;
+}
 
-<a href="/transaksi" class="btn btn-primary">
-💰 Transaksi
-</a>
+.badge{
+    font-size:13px;
+}
 
-<a href="/rekening" class="btn btn-info">
-🏦 Rekening
-</a>
+</style>
 
-<a href="/kategori" class="btn btn-warning">
-📂 Kategori
-</a>
+<div class="container-fluid">
 
-<a href="/laporan" class="btn btn-success">
-📊 Laporan
-</a>
+<div class="page-header">
 
-<a href="/" class="btn btn-secondary">
-🏠 Halaman Utama
-</a>
+<div>
 
-<a href="/login/logout" class="btn btn-danger">
-🚪 Logout
-</a>
+<h2 class="dashboard-title">
+
+💰 Input Transaksi DKM
+
+</h2>
+
+<small class="text-muted">
+
+Keuangan • Donasi Barang • Inventaris Masjid
+
+</small>
+
+</div>
+
+</div>
+
+<!-- ===================================================== -->
+<!-- RINGKASAN -->
+<!-- ===================================================== -->
+
+<div class="row mb-4">
+
+<div class="col-lg-4">
+
+<div class="card shadow-soft">
+
+<div class="card-body text-center">
+
+<h6>Saldo Kas</h6>
+
+<h3 class="text-success">
+
+Rp <%= Number(saldo||0).toLocaleString("id-ID") %>
+
+</h3>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="col-lg-4">
+
+<div class="card shadow-soft">
+
+<div class="card-body text-center">
+
+<h6>Total Pemasukan</h6>
+
+<h3 class="text-primary">
+
+Rp <%= Number(pemasukan||0).toLocaleString("id-ID") %>
+
+</h3>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="col-lg-4">
+
+<div class="card shadow-soft">
+
+<div class="card-body text-center">
+
+<h6>Total Pengeluaran</h6>
+
+<h3 class="text-danger">
+
+Rp <%= Number(pengeluaran||0).toLocaleString("id-ID") %>
+
+</h3>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- ===================================================== -->
+<!-- FORM -->
+<!-- ===================================================== -->
+
+<div class="card shadow-soft">
+
+<div class="card-body">
+
+<div class="row mb-3">
+
+<div class="col-md-4">
+
+<label class="form-label fw-bold">
+
+Jenis Input
+
+</label>
+
+<select
+class="form-select"
+id="jenis_input">
+
+<option value="uang">
+
+💰 Transaksi Uang
+
+</option>
+
+<option value="donasi">
+
+🎁 Donasi Barang
+
+</option>
+
+<option value="inventaris">
+
+📦 Inventaris
+
+</option>
+
+</select>
+
+</div>
 
 </div>
 
 <hr>
 
+<!-- ===================================================== -->
+<!-- FORM UANG -->
+<!-- ===================================================== -->
 
+<div
+id="formUang"
+class="form-section">
 
-<form method="POST" action="/transaksi/simpan">
+<form
+action="/transaksi/simpan"
+method="POST">
 
-<div class="mb-2">
-<label>Tanggal</label>
-<input type="date" name="tanggal" class="form-control" required>
+<input
+type="hidden"
+name="tipe_transaksi"
+value="uang">
+
+<div class="row">
+
+<div class="col-md-3 mb-3">
+
+<label class="form-label">
+
+Tanggal
+
+</label>
+
+<input
+type="date"
+class="form-control"
+id="tanggal_uang"
+name="tanggal"
+required>
+
 </div>
 
-<div class="mb-2">
-<label>Kategori</label>
+<div class="col-md-3 mb-3">
 
-<select name="kategori_id" class="form-control" required>
+<label class="form-label">
 
-<option value="">
-Pilih Kategori
-</option>
+Jenis
 
-<% kategori.forEach(item => { %>
+</label>
 
-<option value="<%= item.id %>">
-<%= item.nama %>
-</option>
-
-<% }) %>
-
-</select>
-</div>
-
-<div class="mb-2">
-<label>Jenis</label>
-
-<select name="jenis" class="form-control">
+<select
+class="form-select"
+name="jenis">
 
 <option value="masuk">
+
 Pemasukan
+
 </option>
 
 <option value="keluar">
+
 Pengeluaran
+
 </option>
 
 </select>
 
 </div>
 
-<div class="mb-2">
-<label>Metode Pembayaran</label>
+<div class="col-md-3 mb-3">
+
+<label class="form-label">
+
+Kategori
+
+</label>
 
 <select
-name="metode"
-id="metode"
-class="form-control">
-
-<option value="tunai">
-Tunai
-</option>
-
-<option value="non_tunai">
-Non Tunai
-</option>
-
-</select>
-</div>
-
-<div
-class="mb-2"
-id="rekeningArea"
-style="display:none;">
-
-<label>Pilih Rekening</label>
-
-<select
-name="rekening_id"
-class="form-control">
+class="form-select"
+name="kategori_id"
+required>
 
 <option value="">
-Pilih Rekening
+
+-- Pilih Kategori --
+
 </option>
 
-<% rekening.forEach(item => { %>
+<% kategori.forEach(function(k){ %>
 
-<option value="<%= item.id %>">
-<%= item.bank %> - <%= item.no_rekening %>
+<% if(k.tipe==="uang"){ %>
+
+<option value="<%= k.id %>">
+
+<%= k.nama %>
+
+</option>
+
+<% } %>
+
+<% }) %>
+
+</select>
+
+</div>
+
+<div class="col-md-3 mb-3">
+
+<label class="form-label">
+
+Metode
+
+</label>
+
+<select
+class="form-select"
+name="metode"
+id="metode">
+
+<option value="tunai">
+
+💵 Tunai
+
+</option>
+
+<option value="transfer">
+
+🏦 Non Tunai
+
+</option>
+
+</select>
+
+</div>
+
+</div>
+
+<div class="row">
+
+<div
+class="col-md-4 mb-3"
+id="rekeningGroup">
+
+<label class="form-label">
+
+Rekening
+
+</label>
+
+<select
+class="form-select"
+name="rekening_id"
+id="rekening_id">
+
+<option value="">
+
+-- Pilih Rekening --
+
+</option>
+
+<% rekening.forEach(function(r){ %>
+
+<option value="<%= r.id %>">
+
+<%= r.bank %> - <%= r.nama_pemilik %>
+
 </option>
 
 <% }) %>
@@ -139,106 +342,1193 @@ Pilih Rekening
 
 </div>
 
-<div class="mb-2">
-<label>Nominal</label>
-<input type="number" name="nominal" class="form-control" required>
+<div class="col-md-4 mb-3">
+
+<label class="form-label">
+
+Nominal
+
+</label>
+
+<input
+type="number"
+class="form-control"
+name="nominal"
+required>
+
 </div>
 
-<div class="mb-2">
-<label>Keterangan</label>
-<textarea name="keterangan" class="form-control"></textarea>
+<div class="col-md-4 mb-3">
+
+<label class="form-label">
+
+Keterangan
+
+</label>
+
+<input
+type="text"
+class="form-control"
+name="keterangan">
+
 </div>
 
-<button class="btn btn-success">
-Simpan
+</div>
+
+<div class="text-end">
+
+<button
+class="btn btn-success">
+
+💾 Simpan Transaksi
+
 </button>
+
+<button
+type="reset"
+class="btn btn-secondary">
+
+Reset
+
+</button>
+
+</div>
 
 </form>
 
-<hr>
+</div>
 
-<h3>Data Transaksi</h3>
+<!-- ===================================================== -->
+<!-- FORM DONASI BARANG -->
 
-<div class="table-responsive">
-<table class="table table-bordered">
+<!-- ===================================================== -->
+<!-- FORM DONASI BARANG -->
+<!-- ===================================================== -->
 
-<thead>
-<tr>
-<th>ID</th>
-<th>Tanggal</th>
-<th>Jenis</th>
-<th>Metode</th>
-<th>Nominal</th>
-<th>Keterangan</th>
-<th>Aksi</th>
-</tr>
-</thead>
+<div
+id="formDonasi"
+class="form-section">
 
-<tbody>
+<form
+action="/transaksi/simpan"
+method="POST">
 
-<% data.forEach(item => { %>
+<input
+type="hidden"
+name="tipe_transaksi"
+value="donasi">
 
-<tr>
+<div class="row">
 
-<td><%= item.id %></td>
-<td><%= new Date(item.tanggal).toLocaleDateString('id-ID',{
-    weekday:'long',
-    day:'2-digit',
-    month:'long',
-    year:'numeric'
-}) %></td>
-<td><%= item.jenis %></td>
-<td><%= item.metode || '-' %></td>
+<div class="col-md-3 mb-3">
 
-<td>
-Rp <%= Number(item.nominal).toLocaleString('id-ID') %>
-</td>
+<label class="form-label">
 
-<td><%= item.keterangan %></td>
+Tanggal
 
-<td>
+</label>
 
-<a
-href="/transaksi/hapus/<%= item.id %>"
-class="btn btn-danger btn-sm"
-onclick="return confirm('Hapus data?')">
+<input
+type="date"
+class="form-control"
+id="tanggal_donasi"
+name="tanggal"
+required>
 
-Hapus
+</div>
 
-</a>
+<div class="col-md-5 mb-3">
 
-</td>
+<label class="form-label">
 
-</tr>
+Nama Donatur
+
+</label>
+
+<input
+type="text"
+class="form-control"
+name="nama_donatur"
+required>
+
+</div>
+
+<div class="col-md-4 mb-3">
+
+<label class="form-label">
+
+Kategori
+
+</label>
+
+<select
+class="form-select"
+name="kategori">
+
+<option value="">-- Pilih Kategori --</option>
+
+<% kategori.forEach(function(k){ %>
+
+<% if(k.tipe==="donasi"){ %>
+
+<option value="<%= k.nama %>">
+
+<%= k.nama %>
+
+</option>
+
+<% } %>
 
 <% }) %>
 
-</tbody>
+</select>
 
-</table>
 </div>
+
+</div>
+
+<div class="row">
+
+<div class="col-md-6 mb-3">
+
+<label class="form-label">
+
+Nama Barang
+
+</label>
+
+<input
+type="text"
+class="form-control"
+name="nama_barang"
+required>
+
+</div>
+
+<div class="col-md-2 mb-3">
+
+<label class="form-label">
+
+Jumlah
+
+</label>
+
+<input
+type="number"
+class="form-control"
+name="jumlah"
+value="1">
+
+</div>
+
+<div class="col-md-2 mb-3">
+
+<label class="form-label">
+
+Satuan
+
+</label>
+
+<input
+type="text"
+class="form-control"
+name="satuan"
+placeholder="Pcs">
+
+</div>
+
+<div class="col-md-2 mb-3">
+
+<label class="form-label">
+
+Kondisi
+
+</label>
+
+<select
+class="form-select"
+name="kondisi">
+
+<option value="Baru">Baru</option>
+
+<option value="Bekas">Bekas</option>
+
+</select>
+
+</div>
+
+</div>
+
+<div class="row">
+
+<div class="col-md-4 mb-3">
+
+<label class="form-label">
+
+Estimasi Harga
+
+</label>
+
+<input
+type="number"
+class="form-control"
+name="estimasi_harga"
+value="0">
+
+</div>
+
+<div class="col-md-8 mb-3">
+
+<label class="form-label">
+
+Keterangan
+
+</label>
+
+<input
+type="text"
+class="form-control"
+name="keterangan">
+
+</div>
+
+</div>
+
+<div class="text-end">
+
+<button
+type="submit"
+class="btn btn-success">
+
+💾 Simpan Donasi Barang
+
+</button>
+
+<button
+type="reset"
+class="btn btn-secondary">
+
+Reset
+
+</button>
+
+</div>
+
+</form>
+
+</div>
+
+<!-- ===================================================== -->
+<!-- FORM INVENTARIS -->
+<!-- ===================================================== -->
+
+<div
+id="formInventaris"
+class="form-section">
+
+<form
+action="/transaksi/simpan"
+method="POST">
+
+<input
+type="hidden"
+name="tipe_transaksi"
+value="inventaris">
+
+<div class="row">
+
+<div class="col-md-3 mb-3">
+
+<label class="form-label">
+
+Tanggal Masuk
+
+</label>
+
+<input
+type="date"
+class="form-control"
+id="tanggal_inventaris"
+name="tanggal_masuk"
+required>
+
+</div>
+
+<div class="col-md-5 mb-3">
+
+<label class="form-label">
+
+Nama Aset
+
+</label>
+
+<input
+type="text"
+class="form-control"
+name="nama_barang"
+required>
+
+</div>
+
+<div class="col-md-4 mb-3">
+
+<label class="form-label">
+
+Kategori
+
+</label>
+
+<select
+class="form-select"
+name="kategori">
+
+<option value="">-- Pilih Kategori --</option>
+
+<% kategori.forEach(function(k){ %>
+
+<% if(k.tipe==="inventaris"){ %>
+
+<option value="<%= k.nama %>">
+
+<%= k.nama %>
+
+</option>
+
+<% } %>
+
+<% }) %>
+
+</select>
+
+</div>
+
+</div>
+
+<div class="row">
+
+<div class="col-md-2 mb-3">
+
+<label class="form-label">
+
+Jumlah
+
+</label>
+
+<input
+type="number"
+class="form-control"
+name="jumlah"
+value="1">
+
+</div>
+
+<div class="col-md-2 mb-3">
+
+<label class="form-label">
+
+Satuan
+
+</label>
+
+<input
+type="text"
+class="form-control"
+name="satuan"
+placeholder="Unit">
+
+</div>
+
+<div class="col-md-3 mb-3">
+
+<label class="form-label">
+
+Kondisi
+
+</label>
+
+<select
+class="form-select"
+name="kondisi">
+
+<option value="Baik">Baik</option>
+
+<option value="Bekas">Bekas</option>
+
+<option value="Service">Service</option>
+
+</select>
+
+</div>
+
+<div class="col-md-5 mb-3">
+
+<label class="form-label">
+
+Lokasi
+
+</label>
+
+<input
+type="text"
+class="form-control"
+name="lokasi">
+
+</div>
+
+</div>
+
+<div class="row">
+
+<div class="col-md-4 mb-3">
+
+<label class="form-label">
+
+Nilai Estimasi
+
+</label>
+
+<input
+type="number"
+class="form-control"
+name="nilai_estimasi"
+value="0">
+
+</div>
+
+<div class="col-md-8 mb-3">
+
+<label class="form-label">
+
+Keterangan
+
+</label>
+
+<input
+type="text"
+class="form-control"
+name="keterangan">
+
+</div>
+
+</div>
+
+<div class="text-end">
+
+<button
+type="submit"
+class="btn btn-success">
+
+💾 Simpan Inventaris
+
+</button>
+
+<button
+type="reset"
+class="btn btn-secondary">
+
+Reset
+
+</button>
+
+</div>
+
+</form>
+
+</div>
+<!-- ===================================================== -->
+<!-- RIWAYAT TRANSAKSI UANG -->
+<!-- ===================================================== -->
+
+<div class="card shadow-soft mt-4">
+
+    <div class="card-header bg-success text-white">
+
+        <h5 class="mb-0">
+
+            💰 Riwayat Transaksi Uang
+
+        </h5>
+
+    </div>
+
+    <div class="card-body table-responsive">
+
+        <table class="table table-bordered table-hover align-middle">
+
+            <thead class="table-light">
+
+                <tr>
+
+                    <th width="40">No</th>
+
+                    <th>Tanggal</th>
+
+                    <th>Jenis</th>
+
+                    <th>Kategori</th>
+
+                    <th>Metode</th>
+
+                    <th>Rekening</th>
+
+                    <th class="text-end">Nominal</th>
+
+                    <th>Keterangan</th>
+
+                    <th width="170">Aksi</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+            <% if(transaksi && transaksi.length){ %>
+
+                <% transaksi.forEach(function(item,index){ %>
+
+                <tr>
+
+                    <td>
+
+                        <%= index+1 %>
+
+                    </td>
+
+                    <td>
+
+                        <%= new Date(item.tanggal).toLocaleDateString("id-ID") %>
+
+                    </td>
+
+                    <td>
+
+                        <% if(item.jenis==="masuk"){ %>
+
+                            <span class="badge bg-success">
+
+                                Pemasukan
+
+                            </span>
+
+                        <% }else{ %>
+
+                            <span class="badge bg-danger">
+
+                                Pengeluaran
+
+                            </span>
+
+                        <% } %>
+
+                    </td>
+
+                    <td>
+
+                        <%= item.kategori || "-" %>
+
+                    </td>
+
+                    <td>
+
+                        <% if(item.metode==="transfer"){ %>
+
+                            <span class="badge bg-primary">
+
+                                Non Tunai
+
+                            </span>
+
+                        <% }else{ %>
+
+                            <span class="badge bg-secondary">
+
+                                Tunai
+
+                            </span>
+
+                        <% } %>
+
+                    </td>
+
+                    <td>
+
+                        <% if(item.metode==="transfer"){ %>
+
+                            <%= item.nama_rekening || "-" %>
+
+                        <% }else{ %>
+
+                            -
+
+                        <% } %>
+
+                    </td>
+
+                    <td class="text-end">
+
+                        Rp <%= Number(item.nominal||0).toLocaleString("id-ID") %>
+
+                    </td>
+
+                    <td>
+
+                        <%= item.keterangan || "-" %>
+
+                    </td>
+
+                    <td>
+
+                        <a
+                        href="/transaksi/edit/<%= item.id %>"
+                        class="btn btn-warning btn-sm">
+
+                            ✏ Edit
+
+                        </a>
+
+                        <a
+                        href="/transaksi/hapus/<%= item.id %>"
+                        class="btn btn-danger btn-sm"
+                        onclick="return confirm('Hapus transaksi ini?')">
+
+                            🗑 Hapus
+
+                        </a>
+
+                    </td>
+
+                </tr>
+
+                <% }) %>
+
+            <% }else{ %>
+
+                <tr>
+
+                    <td colspan="9" class="text-center text-muted">
+
+                        Belum ada transaksi.
+
+                    </td>
+
+                </tr>
+
+            <% } %>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+<!-- ===================================================== -->
+<!-- RIWAYAT DONASI BARANG -->
+<!-- ===================================================== -->
+
+<div class="card shadow-soft mt-4">
+
+    <div class="card-header bg-warning">
+
+        <h5 class="mb-0">
+
+            🎁 Riwayat Donasi Barang
+
+        </h5>
+
+    </div>
+
+    <div class="card-body table-responsive">
+
+        <table class="table table-bordered table-hover align-middle">
+
+            <thead class="table-light">
+
+                <tr>
+
+                    <th width="40">No</th>
+
+                    <th>Tanggal</th>
+
+                    <th>Donatur</th>
+
+                    <th>Barang</th>
+
+                    <th>Kategori</th>
+
+                    <th>Jumlah</th>
+
+                    <th>Kondisi</th>
+
+                    <th class="text-end">Estimasi</th>
+
+                    <th>Keterangan</th>
+
+                    <th width="170">Aksi</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+            <% if(donasi && donasi.length){ %>
+
+                <% donasi.forEach(function(item,index){ %>
+
+                <tr>
+
+                    <td>
+
+                        <%= index+1 %>
+
+                    </td>
+
+                    <td>
+
+                        <%= new Date(item.tanggal).toLocaleDateString("id-ID") %>
+
+                    </td>
+
+                    <td>
+
+                        <%= item.nama_donatur || "-" %>
+
+                    </td>
+
+                    <td>
+
+                        <strong>
+
+                            <%= item.nama_barang %>
+
+                        </strong>
+
+                    </td>
+
+                    <td>
+
+                        <%= item.kategori || "-" %>
+
+                    </td>
+
+                    <td>
+
+                        <%= item.jumlah %> <%= item.satuan %>
+
+                    </td>
+
+                    <td>
+
+                        <% if(item.kondisi=="Baru"){ %>
+
+                            <span class="badge bg-success">
+
+                                Baru
+
+                            </span>
+
+                        <% }else{ %>
+
+                            <span class="badge bg-secondary">
+
+                                Bekas
+
+                            </span>
+
+                        <% } %>
+
+                    </td>
+
+                    <td class="text-end">
+
+                        Rp <%= Number(item.estimasi_harga||0).toLocaleString("id-ID") %>
+
+                    </td>
+
+                    <td>
+
+                        <%= item.keterangan || "-" %>
+
+                    </td>
+
+                    <td>
+
+                        <a
+                        href="/transaksi/edit-donasi/<%= item.id %>"
+                        class="btn btn-warning btn-sm">
+
+                            ✏ Edit
+
+                        </a>
+
+                        <a
+                        href="/transaksi/hapus-donasi/<%= item.id %>"
+                        class="btn btn-danger btn-sm"
+                        onclick="return confirm('Hapus donasi barang ini?')">
+
+                            🗑 Hapus
+
+                        </a>
+
+                    </td>
+
+                </tr>
+
+                <% }) %>
+
+            <% }else{ %>
+
+                <tr>
+
+                    <td colspan="10" class="text-center text-muted">
+
+                        Belum ada data donasi barang.
+
+                    </td>
+
+                </tr>
+
+            <% } %>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+<!-- ===================================================== -->
+<!-- RIWAYAT INVENTARIS MASJID -->
+<!-- ===================================================== -->
+
+<div class="card shadow-soft mt-4">
+
+    <div class="card-header bg-primary text-white">
+
+        <h5 class="mb-0">
+
+            📦 Inventaris Masjid
+
+        </h5>
+
+    </div>
+
+    <div class="card-body table-responsive">
+
+        <table class="table table-bordered table-hover align-middle">
+
+            <thead class="table-light">
+
+                <tr>
+
+                    <th width="40">No</th>
+
+                    <th>Tanggal Masuk</th>
+
+                    <th>Nama Aset</th>
+
+                    <th>Kategori</th>
+
+                    <th>Jumlah</th>
+
+                    <th>Kondisi</th>
+
+                    <th>Lokasi</th>
+
+                    <th class="text-end">Nilai Estimasi</th>
+
+                    <th>Keterangan</th>
+
+                    <th width="170">Aksi</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+            <% if(inventaris && inventaris.length){ %>
+
+                <% inventaris.forEach(function(item,index){ %>
+
+                <tr>
+
+                    <td>
+
+                        <%= index+1 %>
+
+                    </td>
+
+                    <td>
+
+                        <%= new Date(item.tanggal_masuk).toLocaleDateString("id-ID") %>
+
+                    </td>
+
+                    <td>
+
+                        <strong>
+
+                            <%= item.nama_aset %>
+
+                        </strong>
+
+                    </td>
+
+                    <td>
+
+                        <%= item.kategori || "-" %>
+
+                    </td>
+
+                    <td>
+
+                        <%= item.jumlah %> <%= item.satuan %>
+
+                    </td>
+
+                    <td>
+
+                        <% if(item.kondisi=="Baik"){ %>
+
+                            <span class="badge bg-success">
+
+                                Baik
+
+                            </span>
+
+                        <% }else if(item.kondisi=="Bekas"){ %>
+
+                            <span class="badge bg-warning text-dark">
+
+                                Bekas
+
+                            </span>
+
+                        <% }else{ %>
+
+                            <span class="badge bg-danger">
+
+                                Service
+
+                            </span>
+
+                        <% } %>
+
+                    </td>
+
+                    <td>
+
+                        <%= item.lokasi || "-" %>
+
+                    </td>
+
+                    <td class="text-end">
+
+                        Rp <%= Number(item.nilai_estimasi||0).toLocaleString("id-ID") %>
+
+                    </td>
+
+                    <td>
+
+                        <%= item.keterangan || "-" %>
+
+                    </td>
+
+                    <td>
+
+                        <a
+                        href="/transaksi/edit-inventaris/<%= item.id %>"
+                        class="btn btn-warning btn-sm">
+
+                            ✏ Edit
+
+                        </a>
+
+                        <a
+                        href="/transaksi/hapus-inventaris/<%= item.id %>"
+                        class="btn btn-danger btn-sm"
+                        onclick="return confirm('Hapus inventaris ini?')">
+
+                            🗑 Hapus
+
+                        </a>
+
+                    </td>
+
+                </tr>
+
+                <% }) %>
+
+            <% }else{ %>
+
+                <tr>
+
+                    <td colspan="10" class="text-center text-muted">
+
+                        Belum ada data inventaris.
+
+                    </td>
+
+                </tr>
+
+            <% } %>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
 </div>
 <script>
 
-document.addEventListener("DOMContentLoaded", function(){
+/* =====================================================
+   AUTO TANGGAL HARI INI
+===================================================== */
 
-const metode = document.getElementById("metode");
-const rekeningArea = document.getElementById("rekeningArea");
+document.addEventListener("DOMContentLoaded",function(){
+
+    const today=new Date().toISOString().split("T")[0];
+
+    [
+        "tanggal_uang",
+        "tanggal_donasi",
+        "tanggal_inventaris"
+    ].forEach(function(id){
+
+        const el=document.getElementById(id);
+
+        if(el && !el.value){
+
+            el.value=today;
+
+        }
+
+    });
+
+});
 
 
-metode.addEventListener("change", function(){
+/* =====================================================
+   SWITCH FORM
+===================================================== */
 
-    if(this.value === "non_tunai"){
+const jenisInput=document.getElementById("jenis_input");
 
-        rekeningArea.style.display = "block";
+const formUang=document.getElementById("formUang");
 
-    }else{
+const formDonasi=document.getElementById("formDonasi");
 
-        rekeningArea.style.display = "none";
+const formInventaris=document.getElementById("formInventaris");
+
+function tampilkanForm(){
+
+    formUang.style.display="none";
+    formDonasi.style.display="none";
+    formInventaris.style.display="none";
+
+    if(jenisInput.value==="uang"){
+
+        formUang.style.display="block";
 
     }
 
+    if(jenisInput.value==="donasi"){
+
+        formDonasi.style.display="block";
+
+    }
+
+    if(jenisInput.value==="inventaris"){
+
+        formInventaris.style.display="block";
+
+    }
+
+}
+
+tampilkanForm();
+
+jenisInput.addEventListener("change",tampilkanForm);
+
+
+/* =====================================================
+   TUNAI / TRANSFER
+===================================================== */
+
+const metode=document.getElementById("metode");
+
+const rekeningGroup=document.getElementById("rekeningGroup");
+
+const rekeningSelect=document.getElementById("rekening_id");
+
+function toggleRekening(){
+
+    if(!metode) return;
+
+    if(metode.value==="tunai"){
+
+        rekeningGroup.style.display="none";
+
+        rekeningSelect.value="";
+
+        rekeningSelect.removeAttribute("required");
+
+    }else{
+
+        rekeningGroup.style.display="block";
+
+        rekeningSelect.setAttribute("required","required");
+
+    }
+
+}
+
+if(metode){
+
+    toggleRekening();
+
+    metode.addEventListener("change",toggleRekening);
+
+}
+
+
+/* =====================================================
+   FORMAT INPUT ANGKA
+===================================================== */
+
+document.querySelectorAll("input[type='number']").forEach(function(el){
+
+    el.addEventListener("wheel",function(){
+
+        this.blur();
+
+    });
+
 });
+
+
+/* =====================================================
+   RESET FORM
+===================================================== */
+
+document.querySelectorAll("form").forEach(function(frm){
+
+    frm.addEventListener("reset",function(){
+
+        setTimeout(function(){
+
+            tampilkanForm();
+
+            toggleRekening();
+
+        },100);
+
+    });
 
 });
 

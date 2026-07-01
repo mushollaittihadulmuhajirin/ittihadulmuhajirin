@@ -1,72 +1,141 @@
-<!DOCTYPE html>
-<html>
-<head>
+<%- include("partials/header",{title:"Master Kategori"}) %>
 
-<title>Master Kategori</title>
+<%- include("partials/navbar") %>
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
 
-</head>
+.shadow-soft{
+    border:none;
+    border-radius:15px;
+    box-shadow:0 5px 18px rgba(0,0,0,.08);
+}
 
-<body>
+.page-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:25px;
+}
 
-<div class="container mt-4">
+.dashboard-title{
+    font-weight:700;
+}
 
-<h2>📂 Master Kategori</h2>
+</style>
 
-<div class="mb-3">
+<div class="container-fluid">
 
-<a href="/dashboard" class="btn btn-dark">
-📈 Dashboard
-</a>
+<div class="page-header">
 
-<a href="/transaksi" class="btn btn-primary">
-💰 Transaksi
-</a>
+<div>
 
-<a href="/rekening" class="btn btn-info">
-🏦 Rekening
-</a>
+<h2 class="dashboard-title">
 
-<a href="/kategori" class="btn btn-warning">
-📂 Kategori
-</a>
+📂 Master Kategori
 
-<a href="/laporan" class="btn btn-success">
-📊 Laporan
-</a>
+</h2>
 
-<a href="/" class="btn btn-secondary">
-🏠 Halaman Utama
-</a>
+<small class="text-muted">
 
-<a href="/login/logout" class="btn btn-danger">
-🚪 Logout
-</a>
+Kategori Transaksi • Donasi Barang • Inventaris
+
+</small>
 
 </div>
 
-<hr>
+</div>
 
-<form method="POST" action="/kategori/simpan">
+<!-- ===================================================== -->
+<!-- FORM TAMBAH KATEGORI -->
+<!-- ===================================================== -->
+
+<div class="card shadow-soft mb-4">
+
+<div class="card-header bg-success text-white">
+
+<h5 class="mb-0">
+
+➕ Tambah Kategori
+
+</h5>
+
+</div>
+
+<div class="card-body">
+
+<form
+action="/kategori/simpan"
+method="POST">
 
 <div class="row">
 
-<div class="col-md-8">
+<div class="col-md-5 mb-3">
+
+<label class="form-label">
+
+Nama Kategori
+
+</label>
 
 <input
 type="text"
-name="nama"
 class="form-control"
-placeholder="Nama Kategori"
+name="nama"
+placeholder="Contoh : Karpet Masjid"
 required>
 
 </div>
 
-<div class="col-md-4">
+<div class="col-md-4 mb-3">
 
-<button class="btn btn-success w-100">
-Tambah
+<label class="form-label">
+
+Jenis Kategori
+
+</label>
+
+<select
+id="tipe"
+class="form-select"
+name="tipe"
+required>
+
+<option value="">
+
+-- Pilih Jenis --
+
+</option>
+
+<option value="uang">
+
+💰 Transaksi Uang
+
+</option>
+
+<option value="donasi">
+
+🎁 Donasi Barang
+
+</option>
+
+<option value="inventaris">
+
+📦 Inventaris
+
+</option>
+
+</select>
+
+</div>
+
+<div class="col-md-3 mb-3 d-flex align-items-end">
+
+<button
+type="submit"
+class="btn btn-success w-100">
+
+💾 Simpan Kategori
+
 </button>
 
 </div>
@@ -75,54 +144,148 @@ Tambah
 
 </form>
 
-<hr>
+</div>
 
-<h4>Data Kategori</h4>
+</div>
+<!-- ===================================================== -->
+<!-- DAFTAR KATEGORI -->
+<!-- ===================================================== -->
 
-<table class="table table-bordered">
+<div class="card shadow-soft">
 
-<thead class="table-success">
+    <div class="card-header bg-primary text-white">
 
-<tr>
-<th>No</th>
-<th>Nama Kategori</th>
-<th>Aksi</th>
-</tr>
+        <h5 class="mb-0">
 
-</thead>
+            📋 Daftar Kategori
 
-<tbody>
+        </h5>
 
-<% data.forEach((item,index)=>{ %>
+    </div>
 
-<tr>
+    <div class="card-body table-responsive">
 
-<td><%= index + 1 %></td>
+        <table class="table table-bordered table-hover align-middle">
 
-<td><%= item.nama %></td>
+            <thead class="table-light">
 
-<td>
+                <tr>
 
-<a
-href="/kategori/hapus/<%= item.id %>"
-class="btn btn-danger btn-sm"
-onclick="return confirm('Hapus data?')">
+                    <th width="60">No</th>
 
-Hapus
+                    <th>Nama Kategori</th>
 
-</a>
+                    <th width="220">Jenis</th>
 
-</td>
+                    <th width="180">Aksi</th>
 
-</tr>
+                </tr>
 
-<% }) %>
+            </thead>
 
-</tbody>
+            <tbody>
 
-</table>
+            <% if(data && data.length){ %>
+
+                <% data.forEach(function(item,index){ %>
+
+                <tr>
+
+                    <td>
+
+                        <%= index+1 %>
+
+                    </td>
+
+                    <td>
+
+                        <strong><%= item.nama %></strong>
+
+                    </td>
+
+                    <td>
+
+                        <% if(item.tipe==="uang"){ %>
+
+                            <span class="badge bg-success">
+
+                                💰 Transaksi Uang
+
+                            </span>
+
+                        <% }else if(item.tipe==="donasi"){ %>
+
+                            <span class="badge bg-warning text-dark">
+
+                                🎁 Donasi Barang
+
+                            </span>
+
+                        <% }else if(item.tipe==="inventaris"){ %>
+
+                            <span class="badge bg-primary">
+
+                                📦 Inventaris
+
+                            </span>
+
+                        <% }else{ %>
+
+                            <span class="badge bg-secondary">
+
+                                Belum Ditentukan
+
+                            </span>
+
+                        <% } %>
+
+                    </td>
+
+                    <td>
+
+                        <a
+                        href="/kategori/edit/<%= item.id %>"
+                        class="btn btn-warning btn-sm">
+
+                            ✏ Edit
+
+                        </a>
+
+                        <a
+                        href="/kategori/hapus/<%= item.id %>"
+                        class="btn btn-danger btn-sm"
+                        onclick="return confirm('Hapus kategori ini?')">
+
+                            🗑 Hapus
+
+                        </a>
+
+                    </td>
+
+                </tr>
+
+                <% }) %>
+
+            <% }else{ %>
+
+                <tr>
+
+                    <td colspan="4" class="text-center text-muted">
+
+                        Belum ada kategori.
+
+                    </td>
+
+                </tr>
+
+            <% } %>
+
+            </tbody>
+
+        </table>
+
+    </div>
 
 </div>
 
-</body>
-</html>
+</div>

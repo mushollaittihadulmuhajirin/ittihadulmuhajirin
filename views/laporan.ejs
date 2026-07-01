@@ -15,33 +15,57 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
 <style>
 
 body{
-    background:#f4f6f9;
+    background:#f3f5f7;
+    font-family:'Segoe UI',sans-serif;
 }
 
 .header{
     background:#198754;
-    color:white;
+    color:#fff;
     padding:20px;
-    border-radius:10px;
+    border-radius:15px;
     margin-bottom:20px;
 }
 
 .card{
+    border:none;
     border-radius:15px;
-    color:white;
-    box-shadow:0 3px 10px #aaa;
+    overflow:hidden;
+}
+
+.shadow-sm{
+    box-shadow:0 .2rem .7rem rgba(0,0,0,.12)!important;
 }
 
 .masuk{
     background:#198754;
+    color:#fff;
 }
 
 .keluar{
     background:#dc3545;
+    color:#fff;
 }
 
 .saldo{
     background:#0d6efd;
+    color:#fff;
+}
+
+.card-header{
+    font-weight:600;
+}
+
+.table{
+    font-size:14px;
+}
+
+.table th{
+    white-space:nowrap;
+}
+
+.table td{
+    vertical-align:middle;
 }
 
 .table thead{
@@ -57,6 +81,18 @@ tr.pengeluaran{
     background:#ffebee;
 }
 
+.badge{
+    font-size:11px;
+}
+
+canvas{
+    max-height:340px;
+}
+
+.btn{
+    border-radius:8px;
+}
+
 </style>
 
 </head>
@@ -65,9 +101,20 @@ tr.pengeluaran{
 
 <div class="container mt-4">
 
+<div class="mb-3">
+
+    <a href="/" class="btn btn-outline-success">
+
+        <i class="fa-solid fa-arrow-left"></i>
+        Back
+
+    </a>
+
+</div>
+
 <div class="header">
 
-<h2>🕌 DKM Ittihadul Muhajirin</h2>
+<h2>🕌 DKM Masjid Ghairu Jami Ittihadul Muhajirin</h2>
 
 <h4>📊 Laporan Keuangan Masjid</h4>
 
@@ -106,119 +153,705 @@ Rp <%= Number(saldo).toLocaleString('id-ID') %>
 
 </div>
 
-<div class="card mt-4 p-3 bg-white">
 
-<h4 class="text-dark mb-3">
-📈 Grafik Keuangan Masjid
-</h4>
+<div class="row mb-4">
 
-<canvas id="grafikLaporan"></canvas>
+    <!-- GRAFIK -->
+    <div class="col-lg-8">
 
-</div>
+        <div class="card shadow-sm h-100">
 
+            <div class="card-header bg-success text-white d-flex justify-content-between">
+
+                <span>📈 Grafik Keuangan</span>
+
+                <small>
+
+                <% if(mulai && sampai){ %>
+
+                    <%= mulai %> s/d <%= sampai %>
+
+                <% } else { %>
+
+                    Semua Data
+
+                <% } %>
+
+                </small>
+
+            </div>
+
+            <div class="card-body d-flex align-items-center">
+
+                <canvas id="grafikLaporan" height="120"></canvas>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- AKTIVITAS -->
+    <div class="col-lg-4">
+
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-primary text-white">
+
+                <i class="fa-solid fa-clock-rotate-left"></i>
+
+                Aktivitas Terakhir
+
+            </div>
+
+            <div class="card-body p-2">
+
+            <% if(aktivitas.length===0){ %>
+
+                <div class="text-center text-muted py-4">
+
+                    Belum ada aktivitas.
+
+                </div>
+
+            <% } else { %>
+
+                <% aktivitas.forEach(function(a){ %>
+
+                <div class="d-flex mb-3 border-bottom pb-2">
+
+                    <div class="me-3">
+
+                        <% if(a.tipe==="transaksi"){ %>
+
+                            <% if(a.jenis==="masuk"){ %>
+
+                                <span class="badge bg-success">
+                                    <i class="fa-solid fa-arrow-down"></i>
+                                </span>
+
+                            <% }else{ %>
+
+                                <span class="badge bg-danger">
+                                    <i class="fa-solid fa-arrow-up"></i>
+                                </span>
+
+                            <% } %>
+
+                        <% } %>
+
+                        <% if(a.tipe==="donasi"){ %>
+
+                            <span class="badge bg-info">
+
+                                <i class="fa-solid fa-gift"></i>
+
+                            </span>
+
+                        <% } %>
+
+                        <% if(a.tipe==="inventaris"){ %>
+
+                            <span class="badge bg-warning text-dark">
+
+                                <i class="fa-solid fa-box"></i>
+
+                            </span>
+
+                        <% } %>
+
+                    </div>
+
+                    <div class="flex-grow-1">
+
+                        <strong><%= a.judul %></strong>
+
+                        <br>
+
+                        <small class="text-muted">
+
+                            <%= a.subjudul %>
+
+                        </small>
+
+                        <br>
+
+                        <small>
+
+                            <%= new Date(a.tanggal).toLocaleDateString("id-ID",{
+                                day:"2-digit",
+                                month:"short",
+                                year:"numeric"
+                            }) %>
+
+                        </small>
+
+                        <% if(a.nominal){ %>
+
+                        <div class="fw-bold mt-1
+
+                        <%= a.jenis==='masuk'
+                            ?'text-success'
+                            :'text-danger' %>">
+
+                            Rp <%= Number(a.nominal).toLocaleString("id-ID") %>
+
+                        </div>
+
+                        <% } %>
+
+                        <% if(a.jumlah){ %>
+
+                        <div class="text-primary fw-bold">
+
+                            <%= a.jumlah %>
+
+                        </div>
+
+                        <% } %>
+
+                        <% if(a.kondisi){ %>
+
+                        <div>
+
+                            Kondisi :
+                            <span class="badge bg-secondary">
+
+                                <%= a.kondisi %>
+
+                            </span>
+
+                        </div>
+
+                        <% } %>
+
+                    </div>
+
+                </div>
+
+                <% }) %>
+
+            <% } %>
+
+            </div> <!-- card-body -->
+
+        </div> <!-- card -->
+
+    </div> <!-- col-lg-4 -->
+
+</div> <!-- row grafik + aktivitas -->
 <br>
 
 <div class="card p-3 bg-white">
 
-<div class="d-flex justify-content-end mb-3">
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body">
 
-<a href="/laporan/pdf"
-class="btn btn-danger me-2"
-title="Export PDF">
+<form method="GET" action="/laporan" class="row mb-4">
 
-<i class="fa-solid fa-file-pdf"></i>
+    <div class="col-md-4">
+        <label class="form-label">Tanggal Awal</label>
 
-</a>
+        <input
+            type="date"
+            name="mulai"
+            class="form-control"
+            value="<%= mulai || '' %>">
+    </div>
 
-<a href="/laporan/excel"
-class="btn btn-success"
-title="Export Excel">
+    <div class="col-md-4">
+        <label class="form-label">Tanggal Akhir</label>
 
-<i class="fa-solid fa-file-excel"></i>
+        <input
+            type="date"
+            name="sampai"
+            class="form-control"
+            value="<%= sampai || '' %>">
+    </div>
 
-</a>
+    <div class="col-md-4 d-flex align-items-end">
 
+        <button class="btn btn-success me-2">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            Tampilkan
+        </button>
+
+        <a href="/laporan" class="btn btn-secondary">
+            Reset
+        </a>
+
+    </div>
+
+</form>
+  </div>
+</div>
+
+<div class="row mb-4">
+
+    <div class="col-md-3">
+
+        <div class="card border-0 shadow bg-primary text-white">
+
+            <div class="card-body text-center">
+
+                <h6 class="text-white">
+                    💰 Total Transaksi Uang
+                </h6>
+
+             <h4>
+    <%= jumlahTransaksiUang %>
+</h4>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="col-md-3">
+
+        <div class="card border-0 shadow bg-success text-white">
+
+            <div class="card-body text-center">
+
+                <h6 class="text-white">
+                    
+                    🎁 Total Transaksi Donasi Barang
+                    
+                </h6>
+<h4>
+                
+    <%= jumlahDonasiBarang %>
+</h4>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="col-md-3">
+
+        <div class="card border-0 shadow bg-danger text-white">
+
+            <div class="card-body text-center">
+
+                <h6 class="text-white">
+                    📦 Total Transaksi Inventaris
+                </h6>
+
+                <h4 class="fw-bold text-white">
+    <%= jumlahInventaris %>
+</h4>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="col-md-3">
+
+        <div class="card border-0 shadow bg-dark text-white">
+
+            <div class="card-body text-center">
+
+                <h6 class="text-white">
+                    📊 Total Aktivitas
+                </h6>
+
+                <h4>
+                    <%= jumlahTransaksiUang + jumlahDonasiBarang + jumlahInventaris %>
+                </h4>
+
+            </div>
+
+        </div>
+
+    </div>
 
 </div>
+
+<div class="card shadow-sm border-0 mb-4">
+
+    <div class="card-body">
+
+        <div class="row align-items-center">
+
+            <div class="col-lg-6">
+
+                <h5 class="mb-1">
+
+                    📄 Export & Arsip Laporan
+
+                </h5>
+
+                <small class="text-muted">
+
+                    Download laporan keuangan atau buka arsip lama DKM.
+
+                </small>
+
+            </div>
+
+            <div class="col-lg-6 text-lg-end mt-3 mt-lg-0">
+
+                <a href="/laporan/pdf"
+                   class="btn btn-danger me-2">
+
+                    <i class="fa-solid fa-file-pdf"></i>
+
+                    PDF
+
+                </a>
+
+                <a href="/laporan/excel"
+                   class="btn btn-success me-2">
+
+                    <i class="fa-solid fa-file-excel"></i>
+
+                    Excel
+
+                </a>
+
+                <a href="https://drive.google.com/drive/folders/18wukyYZaaxThWp01WyIciawSdSJiQrjV"
+   target="_blank"
+   rel="noopener noreferrer"
+   class="btn btn-warning">
+
+                    Arsip Lama
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<div class="card-header bg-success text-white mb-0">
+
+<h5 class="mb-0">
+💰 Riwayat Transaksi Uang
+</h5>
+
+</div>
+
+<div class="card-body">
 
 <div class="table-responsive">
 
 <table class="table table-bordered">
 
-<thead>
+<thead class="table-success">
 
 <tr>
-<th>Tanggal</th>
-<th>Kategori</th>
-<th>Jenis</th>
-<th>Metode</th>
-<th>Nominal</th>
-<th>Keterangan</th>
+<th>📅 Tanggal</th>
+<th>📂 Kategori</th>
+<th>💳 Jenis</th>
+<th>🏦 Metode</th>
+<th>💰 Nominal</th>
+<th>📝 Keterangan</th>
 </tr>
+
 
 </thead>
 
 <tbody>
 
-<% data.forEach(item => { %>
+<% if(data.length > 0){ %>
 
-<tr class="<%= item.jenis === 'Masuk' ? 'pemasukan' : 'pengeluaran' %>">
+<% data.forEach(function(item){ %>
 
-<td>
-<%= new Date(item.tanggal).toLocaleDateString('id-ID',{
-weekday:'long',
-day:'2-digit',
-month:'long',
-year:'numeric'
-}) %>
+<tr class="<%= item.jenis === 'masuk' ? 'pemasukan' : 'pengeluaran' %>">
+
+    <td>
+        <%= new Date(item.tanggal).toLocaleDateString('id-ID',{
+            weekday:'long',
+            day:'2-digit',
+            month:'long',
+            year:'numeric'
+        }) %>
+    </td>
+
+    <td><%= item.kategori_nama %></td>
+
+    <td>
+
+<% if(item.jenis=="masuk"){ %>
+
+<span class="badge bg-success">
+
+    Pemasukan
+
+</span>
+
+<% }else{ %>
+
+<span class="badge bg-danger">
+
+    Pengeluaran
+
+</span>
+
+<% } %>
+
 </td>
 
-<td>
-<%= item.kategori_nama %>
+    <td>
+
+<% if(item.metode=="tunai"){ %>
+
+💵 Tunai
+
+<% }else{ %>
+
+🏦 Transfer
+
+<% } %>
+
 </td>
 
-<td>
-<%= item.jenis %>
+    <td class="text-end">
+
+<% if(item.jenis=="masuk"){ %>
+
+<strong class="text-success">
+
++ Rp <%= Number(item.nominal).toLocaleString('id-ID') %>
+
+</strong>
+
+<% }else{ %>
+
+<strong class="text-danger">
+
+- Rp <%= Number(item.nominal).toLocaleString('id-ID') %>
+
+</strong>
+
+<% } %>
+
 </td>
 
-<td>
-<%= item.metode %>
-</td>
-
-<td>
-Rp <%= Number(item.nominal).toLocaleString('id-ID') %>
-</td>
-
-<td>
-<%= item.keterangan %>
-</td>
+    <td><%= item.keterangan %></td>
 
 </tr>
 
 <% }) %>
 
-</tbody>
+<% } else { %>
 
+<tr> <td colspan="6" class="text-center"> Belum ada transaksi. </td> </tr>
+
+<% } %>
+
+</tbody>
 </table>
 
 </div>
-
 </div>
+
+<!-- ================= DONASI BARANG ================= -->
 
 <br>
 
-<a href="/" class="btn btn-success">
-⬅ Dashboard
-</a>
+<div class="card shadow-sm mb-4">
+
+    <div class="card-header bg-info text-white">
+
+        <h5 class="mb-0">
+            🎁 Data Donasi Barang
+        </h5>
+
+    </div>
+
+    <div class="card-body">
+
+        <div class="table-responsive">
+
+            <table class="table table-bordered table-striped">
+
+                <thead class="table-info">
+
+<tr>
+
+<th>📅 Tanggal</th>
+<th>👤 Nama Donatur</th>
+<th>📂 Kategori</th>
+<th>🎁 Nama Barang</th>
+<th>📦 Jumlah</th>
+<th>📝 Keterangan</th>
+
+</tr>
+
+</thead>
+
+                <tbody>
+
+                <% if(donasi.length>0){ %>
+
+                    <% donasi.forEach(function(item){ %>
+
+                    <tr>
+
+                        <td>
+
+<%= new Date(item.tanggal).toLocaleDateString("id-ID",{
+weekday:"long",
+day:"2-digit",
+month:"long",
+year:"numeric"
+}) %>
+
+                        </td>
+
+                       <td><%= item.nama_donatur %></td>
+
+<td>
+    <%= item.kategori || "-" %>
+</td>
+
+<td><%= item.nama_barang %></td>
+
+<td>
+    <%= item.jumlah %> <%= item.satuan %>
+</td>
+
+                        <td>
+
+<%= item.keterangan || "-" %>
+
+                        </td>
+
+                    </tr>
+
+                    <% }) %>
+
+                <% }else{ %>
+
+                    <tr>
+
+                        <td colspan="6" class="text-center">
+
+Belum ada Donasi Barang
+
+                        </td>
+
+                    </tr>
+
+                <% } %>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
 
 </div>
+
+
+
+<!-- ================= INVENTARIS MASJID ================= -->
+
+<div class="card shadow-sm">
+
+    <div class="card-header bg-warning text-dark">
+
+        <h5 class="mb-0">
+
+📦 Inventaris Masjid
+
+        </h5>
+
+    </div>
+
+    <div class="card-body">
+
+        <div class="table-responsive">
+
+            <table class="table table-bordered table-hover">
+
+                <thead class="table-warning">
+
+<tr>
+
+    <th>📅 Tanggal Masuk</th>
+    <th>📦 Nama Barang</th>
+    <th>📂 Kategori</th>
+    <th>🔢 Jumlah</th>
+    <th>📏 Satuan</th>
+    <th>✅ Kondisi</th>
+    <th>💰 Nilai Estimasi</th>
+
+</tr>
+
+                <tbody>
+
+                <% if(aset.length>0){ %>
+
+                    <% aset.forEach(function(item,index){ %>
+
+                    <tr>
+
+                       <td><%= new Date(item.tanggal_masuk).toLocaleDateString("id-ID") %></td>
+
+                        <td><%= item.nama_aset %></td>
+                     
+                        <td><%= item.kategori %></td>
+
+                        <td><%= item.jumlah %></td>
+
+                        <td><%= item.satuan %></td>
+
+                        <td><%= item.kondisi %></td>
+
+                        <td class="text-end">
+
+Rp <%= Number(item.nilai_estimasi).toLocaleString("id-ID") %>
+
+                        </td>
+
+                    </tr>
+
+                    <% }) %>
+
+                <% }else{ %>
+
+                    <tr>
+
+                        <td colspan="7" class="text-center">
+
+Belum ada Inventaris
+
+                        </td>
+
+                    </tr>
+
+                <% } %>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- BARU SETELAH ITU SCRIPT -->
 
 <script>
 
 const ctx = document.getElementById("grafikLaporan");
 
 new Chart(ctx, {
-    type: "bar",
+    type:"bar",
     data: {
         labels: ["Pemasukan", "Pengeluaran", "Saldo"],
         datasets: [{

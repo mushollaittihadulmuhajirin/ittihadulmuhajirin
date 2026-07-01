@@ -1,78 +1,1066 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Dashboard DKM</title>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<%- include("partials/header",{title:"Dashboard DKM"}) %>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-</head>
-<body>
+<%- include("partials/navbar") %>
 
-<div class="container mt-4">
+<div class="page-header">
 
-    <h2>Dashboard Keuangan Masjid</h2>
+    <div>
 
-    <div class="row mt-4">
+        <h2 class="dashboard-title">
 
-        <div class="col-md-4">
-            <div class="card text-bg-success">
-                <div class="card-body">
-                    <h5>Saldo Saat Ini</h5>
-                    <h3>Rp <%= Number(saldo).toLocaleString('id-ID') %></h3>
-                </div>
-            </div>
-        </div>
+            Dashboard Keuangan Masjid
 
-        <div class="col-md-4">
-            <div class="card text-bg-primary">
-                <div class="card-body">
-                    <h5>Total Pemasukan</h5>
-                    <h3>Rp <%= Number(pemasukan).toLocaleString('id-ID') %></h3>
-                </div>
-            </div>
-        </div>
+        </h2>
 
-        <div class="col-md-4">
-            <div class="card text-bg-danger">
-                <div class="card-body">
-                    <h5>Total Pengeluaran</h5>
-                    <h3>Rp <%= Number(pengeluaran).toLocaleString('id-ID') %></h3>
-                </div>
-            </div>
-        </div>
+        <small class="text-muted">
 
-    </div>
+            Monitoring Keuangan, Inventaris & Donasi Barang
 
-    <div class="card mt-4">
-        <div class="card-body">
+        </small>
 
-            <canvas id="grafik"></canvas>
-
-        </div>
     </div>
 
 </div>
 
+
+<!-- =============================
+RINGKASAN KEUANGAN
+============================== -->
+
+<div class="row">
+
+<div class="col-lg-4 col-md-6 mb-4">
+
+<div class="info-card bg-saldo">
+
+<div class="big-icon">
+    
+<i class="fa-solid fa-wallet"></i>
+</div>
+
+<h5>
+
+Saldo Saat Ini
+
+</h5>
+
+<h2>
+
+Rp <%= Number(saldo).toLocaleString("id-ID") %>
+
+</h2>
+
+</div>
+
+</div>
+
+<div class="col-lg-4 col-md-6 mb-4">
+
+<div class="info-card bg-masuk">
+
+<div class="big-icon">
+
+<i class="fa-solid fa-arrow-down"></i>
+
+</div>
+
+<h5>
+
+Total Pemasukan
+
+</h5>
+
+<h2>
+
+Rp <%= Number(pemasukan).toLocaleString("id-ID") %>
+
+</h2>
+
+</div>
+
+</div>
+
+<div class="col-lg-4 col-md-6 mb-4">
+
+<div class="info-card bg-keluar">
+
+<div class="big-icon">
+
+<i class="fa-solid fa-arrow-up"></i>
+
+</div>
+
+<h5>
+
+Total Pengeluaran
+
+</h5>
+
+<h2>
+
+Rp <%= Number(pengeluaran).toLocaleString("id-ID") %>
+
+</h2>
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<!-- =============================
+ASET
+============================== -->
+
+<div class="row">
+
+<div class="col-lg-4 col-md-6 mb-4">
+
+<div class="info-card bg-aset">
+
+<div class="big-icon">
+
+<i class="fa-solid fa-box"></i>
+
+</div>
+
+<h5>
+
+Total Jenis Aset
+
+</h5>
+
+<h2>
+
+<%= total_aset %>
+
+</h2>
+
+</div>
+
+</div>
+
+<div class="col-lg-4 col-md-6 mb-4">
+
+<div class="info-card bg-donasi">
+
+<div class="big-icon">
+
+<i class="fa-solid fa-gift"></i>
+
+</div>
+
+<h5>
+
+Jumlah Barang
+
+</h5>
+
+<h2>
+
+<%= total_barang %>
+
+</h2>
+
+</div>
+
+</div>
+
+<div class="col-lg-4 col-md-6 mb-4">
+
+<div class="info-card bg-inventaris">
+
+<div class="big-icon">
+
+<i class="fa-solid fa-building"></i>
+
+</div>
+
+<h5>
+
+Estimasi Nilai Aset
+
+</h5>
+
+<h2>
+
+Rp <%= Number(nilai_aset).toLocaleString("id-ID") %>
+
+</h2>
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<!-- =============================
+MENU CEPAT
+============================== -->
+
+<div class="section">
+
+<h4 class="section-title">
+🚀 Menu Cepat
+</h4>
+
+<div class="row g-4">
+
+<div class="col-lg-3 col-md-6">
+
+<a href="/transaksi" class="quick-card quick-transaksi">
+
+<div class="icon">
+💰
+</div>
+
+<h4>Transaksi</h4>
+
+<p>
+Input pemasukan dan pengeluaran kas masjid.
+</p>
+
+</a>
+
+</div>
+
+<div class="col-lg-3 col-md-6">
+
+<a href="/aset" class="quick-card quick-aset">
+
+<div class="icon">
+📦
+</div>
+
+<h4>Inventaris</h4>
+
+<p>
+Kelola aset dan barang inventaris masjid.
+</p>
+
+</a>
+
+</div>
+
+<div class="col-lg-3 col-md-6">
+
+<a href="/laporan" class="quick-card quick-laporan">
+
+<div class="icon">
+📊
+</div>
+
+<h4>Laporan</h4>
+
+<p>
+Lihat laporan keuangan secara realtime.
+</p>
+
+</a>
+
+</div>
+
+<div class="col-lg-3 col-md-6">
+
+<a href="/rekening" class="quick-card quick-rekening">
+
+<div class="icon">
+🏦
+</div>
+
+<h4>Rekening</h4>
+
+<p>
+Kelola rekening bank dan kas DKM.
+</p>
+
+</a>
+
+</div>
+
+</div>
+
+</div>
+
+
+<!-- =============================
+GRAFIK KEUANGAN
+============================== -->
+
+<div class="section">
+
+<h4 class="section-title">
+
+Grafik Keuangan
+
+</h4>
+
+<div class="chart-card">
+
+<canvas id="grafikKeuangan"></canvas>
+
+</div>
+
+</div>
+
+
+
+<!-- =============================
+RINGKASAN
+============================== -->
+
+<div class="col-lg-6 mb-4">
+
+<div class="summary-card modern-card">
+
+<h4 class="mb-4">
+
+📦 Ringkasan Inventaris
+
+</h4>
+
+<div class="summary-item">
+
+<div>
+
+<div class="summary-label">
+
+Jenis Aset
+
+</div>
+
+<div class="summary-value text-warning">
+
+<%= total_aset %>
+
+</div>
+
+</div>
+
+<div class="summary-icon bg-warning">
+
+🏢
+
+</div>
+
+</div>
+
+<hr>
+
+<div class="summary-item">
+
+<div>
+
+<div class="summary-label">
+
+Jumlah Barang
+
+</div>
+
+<div class="summary-value text-success">
+
+<%= total_barang %>
+
+</div>
+
+</div>
+
+<div class="summary-icon bg-success">
+
+📦
+
+</div>
+
+</div>
+
+<hr>
+
+<div class="summary-item">
+
+<div>
+
+<div class="summary-label">
+
+Estimasi Nilai
+
+</div>
+
+<div class="summary-value text-primary">
+
+Rp <%= Number(nilai_aset).toLocaleString("id-ID") %>
+
+</div>
+
+</div>
+
+<div class="summary-icon bg-primary">
+
+💎
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+<!-- =============================
+AKTIVITAS
+============================== -->
+
+<div class="section">
+
+<h4 class="section-title">
+
+Aktivitas Cepat
+
+</h4>
+
+<div class="row">
+
+<div class="col-lg-4 mb-3">
+
+<div class="inventory-card">
+
+<h4>
+
+💰 Transaksi
+
+</h4>
+
+<p>
+
+Input pemasukan dan pengeluaran kas masjid.
+
+</p>
+
+<a
+
+href="/transaksi"
+
+class="btn btn-success w-100">
+
+Buka
+
+</a>
+
+</div>
+
+</div>
+
+<div class="col-lg-4 mb-3">
+
+<div class="inventory-card">
+
+<h4>
+
+📦 Inventaris
+
+</h4>
+
+<p>
+
+Kelola aset dan barang inventaris masjid.
+
+</p>
+
+<a
+
+href="/aset"
+
+class="btn btn-warning w-100">
+
+Kelola
+
+</a>
+
+</div>
+
+</div>
+
+<div class="col-lg-4 mb-3">
+
+<div class="inventory-card">
+
+<h4>
+
+📊 Laporan
+
+</h4>
+
+<p>
+
+Lihat laporan keuangan dan inventaris.
+
+</p>
+
+<a
+
+href="/laporan"
+
+class="btn btn-primary w-100">
+
+Lihat
+
+</a>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+
+<!-- =============================
+INFORMASI DKM
+============================== -->
+
+<div class="section">
+
+<h4 class="section-title">
+
+Informasi DKM
+
+</h4>
+
+<div class="row">
+
+<div class="col-lg-8 mb-4">
+
+<div class="summary-card">
+
+<h4>
+
+📢 Informasi Sistem
+
+</h4>
+
+<p>
+
+Website ini digunakan untuk mengelola keuangan, inventaris aset,
+serta donasi barang Masjid secara transparan.
+
+</p>
+
+<p>
+
+Administrator dapat melakukan input transaksi,
+inventaris, dan menghasilkan laporan PDF maupun Excel.
+
+</p>
+
+<div class="mt-3">
+
+<a
+href="/laporan"
+class="btn btn-success me-2">
+
+📊 Lihat Laporan
+
+</a>
+
+<a
+href="/transaksi"
+class="btn btn-primary me-2">
+
+💰 Input Transaksi
+
+</a>
+
+<a
+href="/aset"
+class="btn btn-warning">
+
+📦 Inventaris
+
+</a>
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<div class="col-lg-4 mb-4">
+
+<div class="summary-card">
+
+<h4>
+
+📄 Arsip Lama
+
+</h4>
+
+<p>
+
+Laporan sebelum sistem website dapat diakses melalui Google Drive.
+
+</p>
+
+<a
+
+href="https://drive.google.com/"
+
+target="_blank"
+
+class="btn btn-outline-success w-100">
+
+Buka Google Drive
+
+</a>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- =============================
+AKTIVITAS TERBARU
+============================== -->
+
+<div class="section">
+
+<h4 class="section-title">
+🕒 Aktivitas Terbaru
+</h4>
+
+<div class="card shadow-soft">
+
+<div class="card-body p-0">
+
+<table class="table table-hover align-middle mb-0">
+
+<thead class="table-light">
+
+<tr>
+
+<th>Tanggal</th>
+
+<th>Kategori</th>
+
+<th>Jenis</th>
+
+<th class="text-end">Nominal</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<% if(aktivitas.length>0){ %>
+
+<% aktivitas.forEach(function(item){ %>
+
+<tr>
+
+<td>
+
+<%= new Date(item.tanggal).toLocaleDateString("id-ID") %>
+
+</td>
+
+<td>
+
+<%= item.kategori_nama %>
+
+</td>
+
+<td>
+
+<% if(item.jenis=="masuk"){ %>
+
+<span class="badge bg-success">
+
+Pemasukan
+
+</span>
+
+<% }else{ %>
+
+<span class="badge bg-danger">
+
+Pengeluaran
+
+</span>
+
+<% } %>
+
+</td>
+
+<td class="text-end">
+
+<strong>
+
+Rp <%= Number(item.nominal).toLocaleString("id-ID") %>
+
+</strong>
+
+</td>
+
+</tr>
+
+<% }) %>
+
+<% }else{ %>
+
+<tr>
+
+<td colspan="4" class="text-center">
+
+Belum ada transaksi.
+
+</td>
+
+</tr>
+
+<% } %>
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</div>
+
+
+<!-- =============================
+STATISTIK
+============================== -->
+
+<div class="section">
+
+<h4 class="section-title">
+
+Statistik Singkat
+
+</h4>
+
+<div class="row">
+
+<div class="col-md-3 col-6 mb-3">
+
+<div class="inventory-card text-center">
+
+<div class="icon mb-2">
+
+🏦
+
+</div>
+
+<h3>
+
+<%= total_aset %>
+
+</h3>
+
+<p>
+
+Jenis Aset
+
+</p>
+
+</div>
+
+</div>
+
+<div class="col-md-3 col-6 mb-3">
+
+<div class="inventory-card text-center">
+
+<div class="icon mb-2">
+
+📦
+
+</div>
+
+<h3>
+
+<%= total_barang %>
+
+</h3>
+
+<p>
+
+Unit Barang
+
+</p>
+
+</div>
+
+</div>
+
+<div class="col-md-3 col-6 mb-3">
+
+<div class="inventory-card text-center">
+
+<div class="icon mb-2">
+
+💵
+
+</div>
+
+<h3>
+
+Rp <%= Number(nilai_aset).toLocaleString("id-ID") %>
+
+</h3>
+
+<p>
+
+Nilai Inventaris
+
+</p>
+
+</div>
+
+</div>
+
+<div class="col-md-3 col-6 mb-3">
+
+<div class="inventory-card text-center">
+
+<div class="icon mb-2">
+
+📈
+
+</div>
+
+<h3>
+
+Rp <%= Number(saldo).toLocaleString("id-ID") %>
+
+</h3>
+
+<p>
+
+Saldo Kas
+
+</p>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<!-- =============================
+CHART SCRIPT
+============================== -->
+
 <script>
 
-const ctx = document.getElementById("grafik");
+const ctx = document.getElementById("grafikKeuangan");
 
 new Chart(ctx, {
+
     type: "bar",
+
     data: {
-        labels: ["Jan", "Feb", "Mar", "Apr"],
+
+        labels: [
+            "Pemasukan",
+            "Pengeluaran",
+            "Saldo"
+        ],
+
         datasets: [{
-            label: "Pemasukan",
-            data: [1000000, 2000000, 1500000, 3000000]
+
+            label: "Nilai (Rp)",
+
+            data: [
+                <%= pemasukan %>,
+                <%= pengeluaran %>,
+                <%= saldo %>
+            ],
+
+            backgroundColor: [
+                "#198754",
+                "#dc3545",
+                "#0d6efd"
+            ],
+
+            borderRadius: 10,
+
+            borderSkipped: false
+
         }]
+
     },
+
     options: {
+
         responsive: true,
-        maintainAspectRatio: true
+
+        maintainAspectRatio: false,
+
+        plugins: {
+
+            legend: {
+
+                display: false
+
+            },
+
+            tooltip: {
+
+                callbacks: {
+
+                    label: function(context){
+
+                        return "Rp " +
+                        Number(context.raw).toLocaleString("id-ID");
+
+                    }
+
+                }
+
+            }
+
+        },
+
+        scales: {
+
+            y: {
+
+                beginAtZero: true,
+
+                ticks: {
+
+                    callback: function(value){
+
+                        return "Rp " +
+                        Number(value).toLocaleString("id-ID");
+
+                    }
+
+                }
+
+            }
+
+        }
+
     }
+
 });
 
 </script>
-</body>
-</html>
+
+<!-- =============================
+SISTEM INFORMATION
+============================== -->
+
+<div class="section">
+
+    <div class="card shadow-soft">
+
+        <div class="card-body">
+
+            <div class="row">
+
+                <div class="col-lg-8">
+
+                    <h4 class="mb-3">
+
+                        🕌 Sistem Informasi DKM Crystal
+
+                    </h4>
+
+                    <p>
+
+                        Sistem ini dibuat untuk membantu pengurus DKM dalam
+                        mengelola:
+
+                    </p>
+
+                    <ul>
+
+                        <li>✔ Keuangan Masjid</li>
+
+                        <li>✔ Inventaris Aset</li>
+
+                        <li>✔ Donasi Barang</li>
+
+                        <li>✔ Laporan PDF</li>
+
+                        <li>✔ Laporan Excel</li>
+
+                        <li>✔ Monitoring Saldo</li>
+
+                    </ul>
+
+                </div>
+
+                <div class="col-lg-4 text-center">
+
+                    <div class="display-1">
+
+                        🕌
+
+                    </div>
+
+                    <h5>
+
+                        DKM Crystal V2
+
+                    </h5>
+
+                    <small class="text-muted">
+
+                        Responsive Web Application
+
+                    </small>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- =============================
+VERSION
+============================== -->
+
+<div class="mt-4 text-center text-muted">
+
+    <small>
+
+        DKM Crystal © <%= new Date().getFullYear() %>
+
+        <br>
+
+        Sistem Informasi Keuangan, Inventaris & Donasi Barang
+
+    </small>
+
+</div>
+
+
+
+<%- include("partials/footer") %>
+
