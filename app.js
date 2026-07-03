@@ -22,6 +22,9 @@ const kategoriRoute = require("./routes/kategori");
 const asetRoute = require("./routes/aset");
 const donasiBarangRoute = require("./routes/donasiBarang");
 const authRoute = require("./routes/auth");
+const backupRoute = require("./routes/backup");
+const restoreRoute = require("./routes/restore");
+
 
 // =========================
 // SESSION
@@ -63,6 +66,8 @@ app.use("/kategori", kategoriRoute);
 app.use("/aset", asetRoute);
 app.use("/donasi-barang", donasiBarangRoute);
 app.use("/auth", authRoute);
+app.use("/backup", backupRoute);
+app.use("/restore", restoreRoute);
 
 
 // =========================
