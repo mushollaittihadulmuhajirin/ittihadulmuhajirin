@@ -19,7 +19,7 @@ exports.formUbahPassword = (req, res) => {
 // SIMPAN PASSWORD
 // ===============================
 
-exports.simpanPassword = (req, res) => {
+exports.simpanPassword = async (req, res) => {
 
     if (!req.session.user) {
         return res.redirect("/login");
@@ -32,9 +32,7 @@ exports.simpanPassword = (req, res) => {
     } = req.body;
 
     if (password_baru !== konfirmasi) {
-
         return res.send("Konfirmasi password tidak sama.");
-
     }
 
     const adminId = req.session.user.id;
@@ -50,37 +48,29 @@ exports.simpanPassword = (req, res) => {
             }
 
             if (rows.length === 0) {
-
                 return res.send("Admin tidak ditemukan");
-
             }
 
             const admin = rows[0];
 
             let cocok = false;
 
-            // jika password lama masih plaintext
+            // Password lama masih plaintext
             if (admin.password === password_lama) {
-
                 cocok = true;
-
             } else {
-
                 try {
-
                     cocok = await bcrypt.compare(
                         password_lama,
                         admin.password
                     );
-
-                } catch (e) {}
-
+                } catch (e) {
+                    console.log(e);
+                }
             }
 
             if (!cocok) {
-
                 return res.send("Password lama salah.");
-
             }
 
             const hash = await bcrypt.hash(password_baru, 10);
@@ -91,13 +81,13 @@ exports.simpanPassword = (req, res) => {
                 (err2) => {
 
                     if (err2) {
-
                         console.log(err2);
                         return res.send("Gagal mengubah password");
-
                     }
 
-                    res.send("Password berhasil diubah.");
+                    req.session.destroy(() => {
+                        return res.redirect("/login");
+                    });
 
                 }
             );
