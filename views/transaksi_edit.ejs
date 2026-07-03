@@ -100,11 +100,37 @@ Pengeluaran
 <div class="col-md-4 mb-3">
 
 <label class="form-label">
+Metode
+</label>
+
+<select
+name="metode"
+id="metode"
+class="form-select">
+
+    <option value="tunai"
+    <%= data.metode=="tunai" ? "selected" : "" %>>
+        Tunai
+    </option>
+
+    <option value="transfer"
+    <%= data.metode=="transfer" ? "selected" : "" %>>
+        Non Tunai
+    </option>
+
+</select>
+
+</div>
+
+<div class="col-md-4 mb-3" id="rekeningGroup">
+
+<label class="form-label">
 Rekening
 </label>
 
 <select
 name="rekening_id"
+id="rekening_id"
 class="form-select">
 
 <option value="">-- Pilih Rekening --</option>
@@ -125,7 +151,6 @@ value="<%= r.id %>"
 
 </div>
 
-</div>
 
 <div class="mb-3">
 
@@ -204,7 +229,34 @@ Kembali
 </div>
 
 </div>
+<script>
+const metode = document.getElementById("metode");
+const rekeningGroup = document.getElementById("rekeningGroup");
+const rekening = document.getElementById("rekening_id");
+
+function toggleRekening(){
+
+    if(!metode) return;
+
+    if(metode.value==="tunai"){
+
+        rekeningGroup.style.display="none";
+        rekening.value="";
+
+    }else{
+
+        rekeningGroup.style.display="block";
+
+    }
+
+}
+
+toggleRekening();
+
+if(metode){
+    metode.addEventListener("change",toggleRekening);
+}
+</script>
 
 </body>
-
 </html>

@@ -12,9 +12,15 @@ const db = mysql.createPool({
     queueLimit: 0,
 
     enableKeepAlive: true,
-    keepAliveInitialDelay: 0
+    keepAliveInitialDelay: 0,
+
+    // Diperlukan untuk menjalankan beberapa query sekaligus saat proses restore
+    multipleStatements: true
 });
 
+// =========================
+// Test Koneksi Database
+// =========================
 db.getConnection((err, connection) => {
 
     if (err) {
@@ -26,9 +32,11 @@ db.getConnection((err, connection) => {
     console.log("✅ MySQL Connected");
 
     db.query("SELECT DATABASE() AS db", (err, rows) => {
-        if (!err) {
-            console.log("📂 Database aktif :", rows[0].db);
+
+        if (!err && rows.length > 0) {
+            console.log("📂 Database aktif:", rows[0].db);
         }
+
     });
 
     connection.release();

@@ -145,25 +145,19 @@ Kondisi
 name="kondisi"
 class="form-select">
 
-<option value="Baik"
-<%= data.kondisi=="Baik" ? "selected" : "" %>>
-
-Baik
-
+<option value="baru"
+<%= (data.kondisi || "").toLowerCase()=="baru" ? "selected" : "" %>>
+Baru
 </option>
 
-<option value="Rusak Ringan"
-<%= data.kondisi=="Rusak Ringan" ? "selected" : "" %>>
-
-Rusak Ringan
-
+<option value="bekas"
+<%= (data.kondisi || "").toLowerCase()=="bekas" ? "selected" : "" %>>
+Bekas
 </option>
 
-<option value="Rusak Berat"
-<%= data.kondisi=="Rusak Berat" ? "selected" : "" %>>
-
-Rusak Berat
-
+<option value="service"
+<%= (data.kondisi || "").toLowerCase()=="service" ? "selected" : "" %>>
+Service
 </option>
 
 </select>

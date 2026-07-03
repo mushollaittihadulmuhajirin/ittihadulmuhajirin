@@ -3,73 +3,297 @@
 
 <div class="container mt-4">
 
-<div class="card shadow">
+    <div class="card shadow">
 
-<div class="card-header bg-success text-white">
+        <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
 
-<h4>
-💾 Backup Database
-</h4>
+            <h4 class="mb-0">💾 Backup Database</h4>
+
+            <button
+                class="btn btn-light btn-sm"
+                onclick="loadBackupList()">
+
+                🔄 Refresh
+
+            </button>
+
+        </div>
+
+        <div class="card-body">
+
+            <p class="text-muted">
+                Backup database Railway ke Supabase Storage.
+            </p>
+
+            <button
+                id="btnBackup"
+                class="btn btn-success">
+
+                💾 Backup Sekarang
+
+            </button>
+
+            <span
+                id="backupStatus"
+                class="ms-3 fw-bold">
+            </span>
+
+            <hr>
+
+            <h5>Riwayat Backup</h5>
+
+            <table class="table table-bordered table-hover">
+
+                <thead class="table-light">
+
+                    <tr>
+
+                        <th>Nama File</th>
+
+                        <th>Ukuran</th>
+
+                        <th>Dibuat</th>
+
+                        <th width="180">Aksi</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody id="backupTable">
+
+                    <tr>
+
+                        <td colspan="4" class="text-center">
+
+                            Memuat data...
+
+                        </td>
+
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
 
 </div>
 
-<div class="card-body">
+<script>
 
-<p>
+const btn = document.getElementById("btnBackup");
+const status = document.getElementById("backupStatus");
+const table = document.getElementById("backupTable");
 
-Backup seluruh database DKM Crystal.
+// =======================
+// LOAD LIST BACKUP
+// =======================
 
-</p>
+async function loadBackupList(){
 
-<button
-class="btn btn-success">
+    table.innerHTML = `
+        <tr>
+            <td colspan="4" class="text-center">
+                Memuat data...
+            </td>
+        </tr>
+    `;
 
-<i class="fa-solid fa-download"></i>
+    try{
 
-Backup Sekarang
+        const response = await fetch("/backup/list");
+        const result = await response.json();
 
-</button>
+        if(!result.success){
 
-<hr>
+            table.innerHTML = `
+                <tr>
+                    <td colspan="4" class="text-danger text-center">
+                        ${result.message}
+                    </td>
+                </tr>
+            `;
 
-<h5>Riwayat Backup</h5>
+            return;
 
-<table class="table table-bordered">
+        }
 
-<thead>
+        if(result.files.length===0){
 
-<tr>
+            table.innerHTML = `
+                <tr>
+                    <td colspan="4" class="text-center">
+                        Belum ada backup
+                    </td>
+                </tr>
+            `;
 
-<th>Tanggal</th>
+            return;
 
-<th>Status</th>
+        }
 
-<th>Aksi</th>
+        table.innerHTML = "";
 
-</tr>
+        result.files.forEach(file=>{
 
-</thead>
+            const size =
+                file.metadata && file.metadata.size
+                ? Math.round(file.metadata.size/1024)+" KB"
+                : "-";
 
-<tbody>
+            const created =
+                file.created_at
+                ? new Date(file.created_at).toLocaleString()
+                : "-";
 
-<tr>
+            table.innerHTML += `
 
-<td colspan="3" class="text-center">
+                <tr>
 
-Belum ada backup
+                    <td>${file.name}</td>
 
-</td>
+                    <td>${size}</td>
 
-</tr>
+                    <td>${created}</td>
 
-</tbody>
+                    <td>
 
-</table>
+                        <button
+                            class="btn btn-primary btn-sm"
+                            onclick="downloadBackup('${file.name}')">
 
-</div>
+                            ⬇ Download
 
-</div>
+                        </button>
 
-</div>
+                    </td>
+
+                </tr>
+
+            `;
+
+        });
+
+    }
+
+    catch(err){
+
+        table.innerHTML = `
+            <tr>
+                <td colspan="4" class="text-danger text-center">
+                    ${err.message}
+                </td>
+            </tr>
+        `;
+
+    }
+
+}
+
+// =======================
+// BACKUP DATABASE
+// =======================
+
+btn.addEventListener("click", async ()=>{
+
+    btn.disabled = true;
+
+    btn.innerHTML = "⏳ Sedang Backup...";
+
+    status.className = "ms-3 text-primary fw-bold";
+
+    status.innerHTML = "Membuat backup...";
+
+    try{
+
+        const response = await fetch("/backup/now",{
+
+            method:"POST"
+
+        });
+
+        const result = await response.json();
+
+        if(result.success){
+
+            status.className="ms-3 text-success fw-bold";
+
+            status.innerHTML="✅ "+result.fileName;
+
+            alert("Backup database berhasil.");
+
+            await loadBackupList();
+
+        }
+
+        else{
+
+            status.className="ms-3 text-danger fw-bold";
+
+            status.innerHTML="❌ Gagal";
+
+            alert(result.message);
+
+        }
+
+    }
+
+    catch(err){
+
+        status.className="ms-3 text-danger fw-bold";
+
+        status.innerHTML="❌ Error";
+
+        alert(err.message);
+
+    }
+
+    btn.disabled=false;
+
+    btn.innerHTML="💾 Backup Sekarang";
+
+});
+
+// =======================
+// DOWNLOAD BACKUP
+// =======================
+
+async function downloadBackup(fileName){
+
+    try{
+
+        const response = await fetch(
+            "/backup/download/" + encodeURIComponent(fileName)
+        );
+
+        const result = await response.json();
+
+        if(!result.success){
+
+            alert(result.message);
+            return;
+
+        }
+
+        window.open(result.url,"_blank");
+
+    }
+
+    catch(err){
+
+        alert(err.message);
+
+    }
+
+}
+
+// =======================
+
+loadBackupList();
+
+</script>
 
 <%- include("partials/footer") %>

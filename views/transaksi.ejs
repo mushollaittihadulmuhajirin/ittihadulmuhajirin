@@ -401,9 +401,7 @@ Reset
 <!-- ===================================================== -->
 <!-- FORM DONASI BARANG -->
 
-<!-- ===================================================== -->
-<!-- FORM DONASI BARANG -->
-<!-- ===================================================== -->
+
 
 <div
 id="formDonasi"
@@ -750,11 +748,11 @@ Kondisi
 class="form-select"
 name="kondisi">
 
-<option value="Baik">Baru</option>
+<option value="baru">Baru</option>
 
-<option value="Bekas">Bekas</option>
+<option value="bekas">Bekas</option>
 
-<option value="Service">Service</option>
+<option value="service">Service</option>
 
 </select>
 
@@ -1122,25 +1120,33 @@ Reset
 
                     <td>
 
-                        <% if(item.kondisi=="Baru"){ %>
+    <% if((item.kondisi || "").toLowerCase() === "baru"){ %>
 
-                            <span class="badge bg-success">
+        <span class="badge bg-success">
+            Baru
+        </span>
 
-                                Baru
+    <% }else if((item.kondisi || "").toLowerCase() === "bekas"){ %>
 
-                            </span>
+        <span class="badge bg-warning text-dark">
+            Bekas
+        </span>
 
-                        <% }else{ %>
+    <% }else if((item.kondisi || "").toLowerCase() === "service"){ %>
 
-                            <span class="badge bg-secondary">
+        <span class="badge bg-danger">
+            Service
+        </span>
 
-                                Bekas
+    <% }else{ %>
 
-                            </span>
+        <span class="badge bg-secondary">
+            <%= item.kondisi %>
+        </span>
 
-                        <% } %>
+    <% } %>
 
-                    </td>
+</td>
 
                     <td class="text-end">
 
@@ -1292,33 +1298,33 @@ Reset
 
                     <td>
 
-                        <% if(item.kondisi=="Baru"){ %>
+<% if((item.kondisi || "").toLowerCase()=="baru"){ %>
 
-                            <span class="badge bg-success">
+<span class="badge bg-success">
+Baru
+</span>
 
-                                Baru
+<% }else if((item.kondisi || "").toLowerCase()=="bekas"){ %>
 
-                            </span>
+<span class="badge bg-warning text-dark">
+Bekas
+</span>
 
-                        <% }else if(item.kondisi=="Bekas"){ %>
+<% }else if((item.kondisi || "").toLowerCase()=="service"){ %>
 
-                            <span class="badge bg-warning text-dark">
+<span class="badge bg-danger">
+Service
+</span>
 
-                                Bekas
+<% }else{ %>
 
-                            </span>
+<span class="badge bg-secondary">
+<%= item.kondisi %>
+</span>
 
-                        <% }else{ %>
+<% } %>
 
-                            <span class="badge bg-danger">
-
-                                Service
-
-                            </span>
-
-                        <% } %>
-
-                    </td>
+</td>
 
                     <td>
 

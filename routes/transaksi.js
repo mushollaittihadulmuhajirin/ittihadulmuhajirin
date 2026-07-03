@@ -323,6 +323,8 @@ router.post("/update-donasi/:id", checkLogin, (req, res) => {
 router.post("/update/:id", checkLogin, (req, res) => {
 
     const id = req.params.id;
+    console.log("BODY UPDATE:");
+    console.log(req.body);
 
     const {
         tanggal,
@@ -384,7 +386,7 @@ router.post("/update-inventaris/:id", checkLogin, (req, res) => {
     const {
 
         tanggal_masuk,
-        nama_barang,
+        nama_aset,
         kategori,
         jumlah,
         satuan,
@@ -417,7 +419,7 @@ router.post("/update-inventaris/:id", checkLogin, (req, res) => {
         [
 
             tanggal_masuk,
-            nama_barang,
+            nama_aset,
             kategori,
             jumlah,
             satuan,

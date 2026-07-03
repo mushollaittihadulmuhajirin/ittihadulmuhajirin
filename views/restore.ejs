@@ -3,64 +3,159 @@
 
 <div class="container mt-4">
 
-<div class="card shadow">
+    <div class="card shadow">
 
-<div class="card-header bg-danger text-white">
+        <div class="card-header bg-danger text-white">
 
-<h4>
+            <h4 class="mb-0">
+                ♻ Restore Database
+            </h4>
 
-♻ Restore Database
+        </div>
 
-</h4>
+        <div class="card-body">
+
+            <div class="alert alert-warning">
+
+                <strong>Perhatian!</strong>
+
+                <hr>
+
+                <ul class="mb-0">
+                    <li>Backup otomatis akan dibuat sebelum restore.</li>
+                    <li>Database saat ini akan diganti dengan isi file backup.</li>
+                    <li>Pastikan file yang dipilih adalah file backup (.sql).</li>
+                    <li>Proses restore tidak dapat dibatalkan.</li>
+                </ul>
+
+            </div>
+
+            <form id="restoreForm" enctype="multipart/form-data">
+
+                <div class="mb-3">
+
+                    <label class="form-label">
+                        File Backup (.sql)
+                    </label>
+
+                    <input
+                        type="file"
+                        class="form-control"
+                        id="backupFile"
+                        name="backupFile"
+                        accept=".sql"
+                        required>
+
+                </div>
+
+                <button
+                    type="submit"
+                    id="btnRestore"
+                    class="btn btn-danger">
+
+                    ♻ Restore Database
+
+                </button>
+
+            </form>
+
+            <div
+                id="restoreStatus"
+                class="alert mt-3 d-none">
+            </div>
+
+        </div>
+
+    </div>
 
 </div>
 
-<div class="card-body">
+<script>
 
-<div class="alert alert-warning">
+const form = document.getElementById("restoreForm");
+const btn = document.getElementById("btnRestore");
+const statusBox = document.getElementById("restoreStatus");
+const inputFile = document.getElementById("backupFile");
 
-<b>Perhatian!</b>
+form.addEventListener("submit", async function (e) {
 
-Restore akan mengganti seluruh data database.
+    e.preventDefault();
 
-</div>
+    if (inputFile.files.length === 0) {
 
-<table class="table table-bordered">
+        alert("Silakan pilih file backup (.sql).");
+        return;
 
-<thead>
+    }
 
-<tr>
+    const file = inputFile.files[0];
 
-<th>Backup</th>
+    if (!file.name.toLowerCase().endsWith(".sql")) {
 
-<th>Tanggal</th>
+        alert("File harus berekstensi .sql");
+        return;
 
-<th>Aksi</th>
+    }
 
-</tr>
+    const confirmRestore = confirm(
+`Yakin ingin melakukan Restore Database?
 
-</thead>
+• Database saat ini akan diganti.
+• Backup otomatis akan dibuat terlebih dahulu.
+• Proses ini tidak dapat dibatalkan.`
+    );
 
-<tbody>
+    if (!confirmRestore) {
+        return;
+    }
 
-<tr>
+    btn.disabled = true;
+    btn.innerHTML = "⏳ Sedang Restore...";
 
-<td colspan="3" class="text-center">
+    statusBox.className = "alert alert-info mt-3";
+    statusBox.innerHTML = "Mohon tunggu, proses restore sedang berjalan...";
 
-Belum ada file backup
+    try {
 
-</td>
+        const formData = new FormData(form);
 
-</tr>
+        const response = await fetch("/restore/process", {
 
-</tbody>
+            method: "POST",
+            body: formData
 
-</table>
+        });
 
-</div>
+        const result = await response.json();
 
-</div>
+        if (!result.success) {
+            throw new Error(result.message);
+        }
 
-</div>
+        statusBox.className = "alert alert-success mt-3";
+        statusBox.innerHTML =
+            "✅ Restore database berhasil. Halaman akan dialihkan...";
+
+        setTimeout(() => {
+
+            window.location.href = "/dashboard";
+
+        }, 2000);
+
+    } catch (err) {
+
+        statusBox.className = "alert alert-danger mt-3";
+        statusBox.innerHTML = "❌ " + err.message;
+
+    } finally {
+
+        btn.disabled = false;
+        btn.innerHTML = "♻ Restore Database";
+
+    }
+
+});
+
+</script>
 
 <%- include("partials/footer") %>

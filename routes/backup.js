@@ -1,19 +1,55 @@
 const express = require("express");
 const router = express.Router();
 
+const backupController = require("../controllers/backupController");
+
+// =========================
+// Middleware Login
+// =========================
 function checkLogin(req, res, next) {
+
     if (!req.session.user) {
         return res.redirect("/");
     }
+
     next();
+
 }
 
-router.get("/", checkLogin, (req, res) => {
+// =========================
+// Halaman Backup
+// =========================
+router.get(
+    "/",
+    checkLogin,
+    backupController.index
+);
 
-    res.render("backup", {
-        title: "Backup Database"
-    });
+// =========================
+// Backup Sekarang
+// =========================
+router.post(
+    "/now",
+    checkLogin,
+    backupController.backupNow
+);
 
-});
+// =========================
+// List Backup
+// =========================
+router.get(
+    "/list",
+    checkLogin,
+    backupController.listBackup
+);
+
+// =========================
+// Download Backup
+// =========================
+router.get(
+    "/download/:fileName",
+    checkLogin,
+    backupController.downloadBackup
+);
 
 module.exports = router;
