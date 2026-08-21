@@ -8,38 +8,41 @@ const db = mysql.createPool({
     database: process.env.DB_NAME,
 
     waitForConnections: true,
-    connectionLimit: 10,
+
+    // Lebih kecil untuk lingkungan Vercel Serverless
+    connectionLimit: 5,
+
     queueLimit: 0,
 
-    enableKeepAlive: true,
-    keepAliveInitialDelay: 0,
+    // Jangan mempertahankan koneksi terlalu agresif
+    enableKeepAlive: false,
 
-    // Diperlukan untuk menjalankan beberapa query sekaligus saat proses restore
+    // Timeout koneksi
+    connectTimeout: 10000,
+
+    // Diperlukan untuk restore SQL
     multipleStatements: true
 });
 
 // =========================
-// Test Koneksi Database
+// TEST KONEKSI
 // =========================
-db.getConnection((err, connection) => {
+
+db.query("SELECT DATABASE() AS db", (err, rows) => {
 
     if (err) {
-        console.error("❌ Koneksi database gagal");
+
+        console.error("❌ Koneksi database gagal:");
         console.error(err);
+
         return;
     }
 
     console.log("✅ MySQL Connected");
 
-    db.query("SELECT DATABASE() AS db", (err, rows) => {
-
-        if (!err && rows.length > 0) {
-            console.log("📂 Database aktif:", rows[0].db);
-        }
-
-    });
-
-    connection.release();
+    if (rows && rows.length > 0) {
+        console.log("📂 Database aktif:", rows[0].db);
+    }
 
 });
 
