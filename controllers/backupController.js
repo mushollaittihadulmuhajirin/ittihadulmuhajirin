@@ -1,10 +1,6 @@
 const fs = require("fs");
 const path = require("path");
 const backupService = require("../services/backupService");
-let supabase = null;
-try {
-    supabase = require("../config/supabase");
-} catch (_) {}
 
 // =========================
 // HALAMAN BACKUP
@@ -17,18 +13,64 @@ exports.index = async (req, res) => {
 };
 
 // =========================
-// BACKUP SEKARANG
+// BACKUP MANUAL & UNDUH KE PERANGKAT
+// Mendukung unduhan via AJAX blob maupun direct browser request
+// =========================
+exports.backupDownload = async (req, res) => {
+    try {
+        const result = await backupService.backupDatabase();
+
+        // Header wajib agar browser (PC/Laptop & HP) memicu dialog unduhan
+        res.setHeader("Content-Type", "application/sql");
+        res.setHeader("Content-Disposition", `attachment; filename="${result.fileName}"`);
+        res.setHeader("Content-Length", result.size);
+        res.setHeader("X-Backup-Filename", result.fileName);
+        res.setHeader("X-Backup-Size", result.size);
+        res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+        res.setHeader("Pragma", "no-cache");
+        res.setHeader("Expires", "0");
+
+        // Kirim file langsung menggunakan res.download
+        return res.download(result.localPath, result.fileName, (err) => {
+            if (err) {
+                console.error("❌ [BACKUP DOWNLOAD ERROR]:", err.message);
+                if (!res.headersSent) {
+                    res.status(500).json({
+                        success: false,
+                        message: "Gagal mengirimkan file backup: " + err.message
+                    });
+                }
+            } else {
+                console.log(`✅ [BACKUP MANUAL] File ${result.fileName} (${result.size} bytes) sukses dikirim ke client.`);
+            }
+        });
+    } catch (err) {
+        console.error("❌ [BACKUP ERROR]:", err);
+        res.status(500).json({
+            success: false,
+            message: err.message || "Gagal membuat backup database."
+        });
+    }
+};
+
+// =========================
+// BACKUP SEKARANG (KOMPATIBILITAS)
 // =========================
 exports.backupNow = async (req, res) => {
+    // Jika request menghendaki unduhan streaming langsung
+    if (req.query.download === "true" || req.headers.accept?.includes("application/sql")) {
+        return exports.backupDownload(req, res);
+    }
+
     try {
         const result = await backupService.backupDatabase();
 
         res.json({
             success: true,
-            message: "Backup database berhasil dibuat.",
+            message: "Backup database manual berhasil dibuat.",
             fileName: result.fileName,
             size: result.size,
-            uploadedToCloud: result.uploadedToCloud
+            downloadUrl: `/backup/download/${encodeURIComponent(result.fileName)}`
         });
     } catch (err) {
         console.error("Backup now error:", err);
@@ -40,59 +82,30 @@ exports.backupNow = async (req, res) => {
 };
 
 // =========================
-// LIST BACKUP
+// LIST BACKUP SEMENTARA
 // =========================
 exports.listBackup = async (req, res) => {
     try {
-        const filesMap = new Map();
-
-        // 1. Ambil file dari direktori penyimpanan backup (lokal backups/ atau /tmp/backups di serverless)
         const backupsDir = backupService.getBackupsDir();
+        const files = [];
+
         if (fs.existsSync(backupsDir)) {
             const localFiles = fs.readdirSync(backupsDir).filter(f => f.endsWith(".sql"));
             localFiles.forEach(f => {
                 const fPath = path.join(backupsDir, f);
-                const stat = fs.statSync(fPath);
-                filesMap.set(f, {
-                    name: f,
-                    metadata: { size: stat.size },
-                    created_at: stat.birthtime.toISOString(),
-                    source: "local"
-                });
+                try {
+                    const stat = fs.statSync(fPath);
+                    files.push({
+                        name: f,
+                        metadata: { size: stat.size },
+                        created_at: stat.mtime.toISOString(),
+                        source: "local"
+                    });
+                } catch (_) {}
             });
         }
 
-        // 2. Ambil dari Supabase jika dikonfigurasi
-        if (supabase && process.env.SUPABASE_BUCKET && process.env.SUPABASE_URL && !process.env.SUPABASE_URL.includes("placeholder")) {
-            try {
-                const { data, error } = await supabase.storage
-                    .from(process.env.SUPABASE_BUCKET)
-                    .list("", {
-                        sortBy: { column: "created_at", order: "desc" }
-                    });
-
-                if (!error && Array.isArray(data)) {
-                    data.forEach(item => {
-                        if (item.name && item.name.endsWith(".sql")) {
-                            if (!filesMap.has(item.name)) {
-                                filesMap.set(item.name, {
-                                    name: item.name,
-                                    metadata: item.metadata || { size: 0 },
-                                    created_at: item.created_at || new Date().toISOString(),
-                                    source: "cloud"
-                                });
-                            }
-                        }
-                    });
-                }
-            } catch (sbErr) {
-                // Ignore cloud listing error if offline
-            }
-        }
-
-        const files = Array.from(filesMap.values()).sort((a, b) => {
-            return new Date(b.created_at) - new Date(a.created_at);
-        });
+        files.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
         res.json({
             success: true,
@@ -108,7 +121,7 @@ exports.listBackup = async (req, res) => {
 };
 
 // =========================
-// DOWNLOAD BACKUP
+// DOWNLOAD BACKUP TERTENTU
 // =========================
 exports.downloadBackup = async (req, res) => {
     try {
@@ -122,39 +135,18 @@ exports.downloadBackup = async (req, res) => {
             });
         }
 
-        // 1. Periksa apakah file tersedia di folder penyimpanan backup (lokal atau /tmp)
         const backupsDir = backupService.getBackupsDir();
         const localFilePath = path.join(backupsDir, fileName);
 
         if (fs.existsSync(localFilePath)) {
-            // Jika request meminta JSON info (dari fetch)
-            if (req.headers.accept && req.headers.accept.includes("application/json")) {
-                return res.json({
-                    success: true,
-                    url: `/backup/download/${encodeURIComponent(fileName)}?direct=true`
-                });
-            }
-            // Stream file download
+            res.setHeader("Content-Type", "application/sql");
+            res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`);
             return res.download(localFilePath, fileName);
-        }
-
-        // 2. Jika tidak ada di lokal, periksa di Supabase Storage
-        if (supabase && process.env.SUPABASE_BUCKET) {
-            const { data, error } = await supabase.storage
-                .from(process.env.SUPABASE_BUCKET)
-                .createSignedUrl(fileName, 60);
-
-            if (!error && data?.signedUrl) {
-                return res.json({
-                    success: true,
-                    url: data.signedUrl
-                });
-            }
         }
 
         return res.status(404).json({
             success: false,
-            message: "File backup tidak ditemukan."
+            message: "File backup tidak ditemukan atau sesi sementara telah berakhir."
         });
     } catch (err) {
         console.error("Download backup error:", err);

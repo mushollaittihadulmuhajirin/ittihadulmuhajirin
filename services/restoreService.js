@@ -44,12 +44,13 @@ async function restoreDatabase(file, targetDbName) {
     let customPool = null;
 
     if (targetDbName && targetDbName !== process.env.DB_NAME) {
-        const isSsl = process.env.DB_SSL !== "false";
+        const isLocalTest = targetDbName === "dkm_crystal_restore_test" || targetDbName === "dkm_crystal_local_test";
+        const isSsl = !isLocalTest && process.env.DB_SSL !== "false";
         customPool = mysql.createPool({
-            host: process.env.DB_HOST || "127.0.0.1",
-            port: Number(process.env.DB_PORT || 3306),
-            user: process.env.DB_USER || "root",
-            password: process.env.DB_PASSWORD || "",
+            host: isLocalTest ? (process.env.TEST_DB_HOST || "127.0.0.1") : (process.env.DB_HOST || "127.0.0.1"),
+            port: isLocalTest ? Number(process.env.TEST_DB_PORT || 3306) : Number(process.env.DB_PORT || 3306),
+            user: isLocalTest ? (process.env.TEST_DB_USER || "root") : (process.env.DB_USER || "root"),
+            password: isLocalTest ? (process.env.TEST_DB_PASSWORD || "") : (process.env.DB_PASSWORD || ""),
             database: targetDbName,
             multipleStatements: true,
             ssl: isSsl ? { minVersion: "TLSv1.2" } : false
@@ -95,9 +96,13 @@ async function restoreDatabase(file, targetDbName) {
             }
         }
 
-        // 5. Eksekusi SQL Dump
+        // 5. Eksekusi SQL Dump (kompatibilitas collation lintas MySQL 8 / TiDB / MariaDB)
         console.log("📥 [RESTORE] Mengimpor skema dan data backup SQL...");
-        await runQuery(sqlContent);
+        let executableSql = sqlContent;
+        if (executableSql.includes("utf8mb4_0900_ai_ci")) {
+            executableSql = executableSql.replace(/utf8mb4_0900_ai_ci/g, "utf8mb4_unicode_ci");
+        }
+        await runQuery(executableSql);
 
         // 6. Enable Foreign Key Checks kembali
         await runQuery("SET FOREIGN_KEY_CHECKS = 1;");

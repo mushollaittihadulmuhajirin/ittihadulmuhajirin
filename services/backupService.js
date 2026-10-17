@@ -2,10 +2,6 @@ const mysqldump = require("mysqldump");
 const fs = require("fs");
 const path = require("path");
 const os = require("os");
-let supabase = null;
-try {
-    supabase = require("../config/supabase");
-} catch (_) {}
 
 /**
  * Menentukan direktori penyimpanan backup yang aman:
@@ -37,13 +33,43 @@ function getBackupsDir() {
 }
 
 /**
- * Membuat backup database MySQL/MariaDB secara asinkron
- * Mendukung penyimpanan di direktori aman (lokal /tmp) dan sinkronisasi ke Supabase Storage (jika aktif)
+ * Membersihkan file backup sementara yang lebih tua dari maxAgeMinutes (default: 60 menit)
+ */
+function cleanOldTempBackups(maxAgeMinutes = 60) {
+    try {
+        const dir = getBackupsDir();
+        if (fs.existsSync(dir)) {
+            const files = fs.readdirSync(dir);
+            const now = Date.now();
+            files.forEach(file => {
+                if (file.endsWith(".sql")) {
+                    const filePath = path.join(dir, file);
+                    try {
+                        const stats = fs.statSync(filePath);
+                        if (now - stats.mtimeMs > maxAgeMinutes * 60 * 1000) {
+                            fs.unlinkSync(filePath);
+                        }
+                    } catch (_) {}
+                }
+            });
+        }
+    } catch (_) {}
+}
+
+/**
+ * Membuat backup database MySQL/MariaDB/TiDB secara asinkron
+ * Menghasilkan dump SQL mandiri dengan format nama unik `backup-dkm-YYYY-MM-DD-HH-mm-ss.sql`
+ * yang disimpan sementara di server untuk langsung diunduh ke perangkat admin.
  */
 async function backupDatabase() {
     const now = new Date();
-    const timestampStr = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}${String(now.getDate()).padStart(2, "0")}-${String(now.getHours()).padStart(2, "0")}${String(now.getMinutes()).padStart(2, "0")}${String(now.getSeconds()).padStart(2, "0")}`;
-    const fileName = `backup-${timestampStr}.sql`;
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+    const hours = String(now.getHours()).padStart(2, "0");
+    const minutes = String(now.getMinutes()).padStart(2, "0");
+    const seconds = String(now.getSeconds()).padStart(2, "0");
+    const fileName = `backup-dkm-${year}-${month}-${day}-${hours}-${minutes}-${seconds}.sql`;
 
     // Konfigurasi SSL dinamis (aman untuk local MariaDB maupun TiDB Cloud)
     const isSsl = process.env.DB_SSL !== "false";
@@ -75,7 +101,7 @@ async function backupDatabase() {
         connectionConfig.ssl = sslConfig;
     }
 
-    console.log(`📦 [BACKUP] Memulai dump dari database: ${connectionConfig.database} (${connectionConfig.host}:${connectionConfig.port})...`);
+    console.log(`📦 [BACKUP MANUAL] Memulai dump database: ${connectionConfig.database} (${connectionConfig.host}:${connectionConfig.port})...`);
 
     const result = await mysqldump({
         connection: connectionConfig,
@@ -97,9 +123,11 @@ async function backupDatabase() {
 
     const sqlBackup = [
         `-- ========================================================`,
-        `-- DKM Crystal Database Backup`,
+        `-- DKM Crystal Database Backup (Manual Admin)`,
         `-- Database: ${connectionConfig.database}`,
+        `-- File: ${fileName}`,
         `-- Generated: ${now.toISOString()} (${now.toLocaleString('id-ID')})`,
+        `-- Note: Berkas SQL ini dapat langsung dipulihkan melalui menu Restore`,
         `-- ========================================================`,
         ``,
         result.dump?.schema || "",
@@ -113,45 +141,27 @@ async function backupDatabase() {
 
     const fileBuffer = Buffer.from(sqlBackup, "utf8");
 
-    // 1. Simpan ke direktori yang aman (lokal backups/ atau /tmp/backups di Vercel)
+    // Bersihkan file sementara lama jika ada
+    cleanOldTempBackups(60);
+
+    // Simpan ke direktori sementara (lokal backups/ atau /tmp/backups di Vercel)
     const backupsDir = getBackupsDir();
     const localFilePath = path.join(backupsDir, fileName);
     fs.writeFileSync(localFilePath, fileBuffer);
-    console.log(`💾 [BACKUP] Tersimpan di disk: ${localFilePath} (${fileBuffer.length} bytes)`);
-
-    // 2. Upload ke Supabase Storage jika dikonfigurasi dan aktif
-    let uploadedToCloud = false;
-    if (supabase && process.env.SUPABASE_BUCKET && process.env.SUPABASE_URL && !process.env.SUPABASE_URL.includes("placeholder")) {
-        try {
-            const { error } = await supabase.storage
-                .from(process.env.SUPABASE_BUCKET)
-                .upload(fileName, fileBuffer, {
-                    contentType: "application/sql",
-                    upsert: false
-                });
-
-            if (!error) {
-                uploadedToCloud = true;
-                console.log(`☁️ [BACKUP] Tersinkronisasi ke Supabase Storage: ${fileName}`);
-            } else {
-                console.warn(`⚠️ [BACKUP] Sinkronisasi Supabase gagal (tetap aman di disk): ${error.message}`);
-            }
-        } catch (sbErr) {
-            console.warn(`⚠️ [BACKUP] Supabase offline/error (tetap aman di disk): ${sbErr.message}`);
-        }
-    }
+    console.log(`💾 [BACKUP MANUAL] Berkas sementara dibuat di disk: ${localFilePath} (${fileBuffer.length} bytes)`);
 
     return {
         success: true,
         fileName,
         size: fileBuffer.length,
         localPath: localFilePath,
-        uploadedToCloud,
+        fileBuffer,
         createdAt: now.toISOString()
     };
 }
 
 module.exports = {
     backupDatabase,
-    getBackupsDir
+    getBackupsDir,
+    cleanOldTempBackups
 };

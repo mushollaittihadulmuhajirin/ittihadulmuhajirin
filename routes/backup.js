@@ -24,7 +24,22 @@ router.get(
 );
 
 // =========================
-// Backup Sekarang
+// Backup Manual & Download Langsung ke Perangkat (POST & GET Direct)
+// =========================
+router.post(
+    "/download",
+    checkLogin,
+    backupController.backupDownload
+);
+
+router.get(
+    "/download-direct",
+    checkLogin,
+    backupController.backupDownload
+);
+
+// =========================
+// Backup Sekarang (Kompatibilitas)
 // =========================
 router.post(
     "/now",
@@ -33,7 +48,7 @@ router.post(
 );
 
 // =========================
-// List Backup
+// List Backup Sementara
 // =========================
 router.get(
     "/list",
@@ -42,7 +57,7 @@ router.get(
 );
 
 // =========================
-// Download Backup
+// Download Backup File Tertentu
 // =========================
 router.get(
     "/download/:fileName",
