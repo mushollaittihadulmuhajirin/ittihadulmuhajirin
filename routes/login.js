@@ -52,7 +52,16 @@ router.post("/", (req, res) => {
                 username: admin.username
             };
 
-            res.redirect("/transaksi");
+            if (typeof req.session.save === "function") {
+                req.session.save((saveErr) => {
+                    if (saveErr) {
+                        console.error("Session save error:", saveErr);
+                    }
+                    res.redirect("/transaksi");
+                });
+            } else {
+                res.redirect("/transaksi");
+            }
 
         }
     );
@@ -60,11 +69,20 @@ router.post("/", (req, res) => {
 });
 
 router.get("/logout", (req, res) => {
-
-    req.session.destroy(() => {
-       res.redirect("/");
-    });
-
+    if (req.session && typeof req.session.destroy === "function") {
+        req.session.destroy(() => {
+            res.clearCookie("dkm_session");
+            res.clearCookie("dkm_session.sig");
+            res.clearCookie("connect.sid");
+            res.redirect("/");
+        });
+    } else {
+        req.session = null;
+        res.clearCookie("dkm_session");
+        res.clearCookie("dkm_session.sig");
+        res.clearCookie("connect.sid");
+        res.redirect("/");
+    }
 });
 
 module.exports = router;

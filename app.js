@@ -4,10 +4,15 @@ require("dotenv").config();
 
 const path = require("path");
 const express = require("express");
-const session = require("express-session");
+const cookieSession = require("cookie-session");
 
 const app = express();
 const db = require("./config/db");
+
+// =========================
+// TRUST PROXY (Vercel Serverless / Reverse Proxy)
+// =========================
+app.set("trust proxy", 1);
 
 // =========================
 // ROUTES
@@ -31,18 +36,37 @@ const passwordResetRoute = require("./routes/passwordReset");
 
 
 // =========================
-// SESSION
+// SESSION (Serverless-compatible Signed Cookie Session)
 // =========================
 app.use(
-    session({
-        secret: process.env.SESSION_SECRET || "dkm-secret",
-        resave: false,
-        saveUninitialized: false,
-        cookie: {
-            maxAge: 1000 * 60 * 60 * 8
-        }
+    cookieSession({
+        name: "dkm_session",
+        keys: [process.env.SESSION_SECRET || "dkm-crystal-session-secret-2026-key"],
+        maxAge: 1000 * 60 * 60 * 8, // 8 jam
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/"
     })
 );
+
+// Backward-compatibility shims for session.destroy() and session.save()
+app.use((req, res, next) => {
+    if (req.session) {
+        if (!req.session.destroy) {
+            req.session.destroy = function (cb) {
+                req.session = null;
+                if (typeof cb === "function") cb();
+            };
+        }
+        if (!req.session.save) {
+            req.session.save = function (cb) {
+                if (typeof cb === "function") cb();
+            };
+        }
+    }
+    next();
+});
 
 // =========================
 // VIEW ENGINE
@@ -62,7 +86,13 @@ app.use(express.static(path.join(__dirname, "public")));
 // =========================
 app.use("/", homeRoute);
 app.use("/login", loginRoute);
-app.get("/logout", (req, res) => res.redirect("/login/logout"));
+app.get("/logout", (req, res) => {
+    req.session = null;
+    res.clearCookie("dkm_session");
+    res.clearCookie("dkm_session.sig");
+    res.clearCookie("connect.sid");
+    res.redirect("/");
+});
 app.use("/dashboard", dashboardRoute);
 app.use("/laporan", laporanRoute);
 app.use("/transaksi", transaksiRoute);

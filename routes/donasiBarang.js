@@ -3,10 +3,20 @@ const router = express.Router();
 const db = require("../config/db");
 
 /* ==========================================
+   MIDDLEWARE LOGIN
+========================================== */
+function checkLogin(req, res, next) {
+    if (req.session && req.session.user) {
+        return next();
+    }
+    return res.redirect("/login");
+}
+
+/* ==========================================
    LIST DONASI BARANG
 ========================================== */
 
-router.get("/", (req, res) => {
+router.get("/", checkLogin, (req, res) => {
 
     db.query(
         `
