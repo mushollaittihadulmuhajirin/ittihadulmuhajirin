@@ -21,7 +21,9 @@ function checkLogin(req, res, next) {
 // =========================
 const upload = multer({
 
-    dest: path.join(__dirname, "../temp"),
+    dest: (process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME)
+        ? path.join(require("os").tmpdir(), "temp")
+        : path.join(__dirname, "../temp"),
 
     limits: {
         fileSize: 50 * 1024 * 1024 // 50 MB

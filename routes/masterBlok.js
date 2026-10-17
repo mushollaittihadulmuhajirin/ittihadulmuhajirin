@@ -24,7 +24,7 @@ router.get("/", checkLogin, (req, res) => {
 
     // Ambil statistik ringkas keseluruhan
     const statSql = `
-        SELECT 
+        SELECT
             COUNT(*) AS total_semua,
             SUM(CASE WHEN aktif = 1 THEN 1 ELSE 0 END) AS total_aktif,
             SUM(CASE WHEN aktif = 0 THEN 1 ELSE 0 END) AS total_nonaktif
@@ -70,7 +70,7 @@ router.get("/", checkLogin, (req, res) => {
 
             // Query baris data lengkap dengan penghitungan relasi ke saran_masukan
             const dataSql = `
-                SELECT 
+                SELECT
                     m.id,
                     m.kode_blok,
                     m.aktif,
@@ -136,7 +136,10 @@ router.post("/tambah", checkLogin, (req, res) => {
     db.query(checkSql, [kodeBlok], (errCheck, rowsCheck) => {
         if (errCheck) {
             console.error("Error cek duplikasi blok:", errCheck);
-            return res.redirect(`/master-blok?error=${encodeURIComponent("Gagal memeriksa keunikan kode blok.")}`);
+            const msg = (errCheck.code === "ER_NO_SUCH_TABLE")
+                ? "Tabel master_blok belum dibuat di database. Harap jalankan migrasi database terlebih dahulu."
+                : "Gagal memeriksa keunikan kode blok.";
+            return res.redirect(`/master-blok?error=${encodeURIComponent(msg)}`);
         }
 
         if (rowsCheck && rowsCheck.length > 0) {

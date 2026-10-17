@@ -179,11 +179,14 @@ function apiSimpanSaran(req, res) {
     const verifyBlokSql = `SELECT * FROM master_blok WHERE kode_blok = ? AND aktif = 1 LIMIT 1`;
     db.query(verifyBlokSql, [blok], (errBlok, rowsBlok) => {
         if (errBlok) {
-            console.error("Error verifikasi blok di database:", errBlok);
-            return res.status(500).json({
-                success: false,
-                error: "Terjadi kesalahan internal saat memvalidasi blok."
-            });
+            console.warn("Tabel master_blok belum ada di DB, memvalidasi terhadap daftar blok resmi fallback:", errBlok.message);
+            if (!DAFTAR_BLOK_DEFAULT.includes(blok)) {
+                return res.status(400).json({
+                    success: false,
+                    error: `Kode blok "${blok}" tidak terdaftar dalam master data blok resmi. Pastikan Anda memilih dari sugesti autocomplete.`
+                });
+            }
+            rowsBlok = [{ id: null, kode_blok: blok }];
         }
 
         if (!rowsBlok || rowsBlok.length === 0) {

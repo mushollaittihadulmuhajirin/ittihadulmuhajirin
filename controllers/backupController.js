@@ -46,8 +46,8 @@ exports.listBackup = async (req, res) => {
     try {
         const filesMap = new Map();
 
-        // 1. Ambil file dari direktori lokal 'backups/'
-        const backupsDir = path.join(__dirname, "../backups");
+        // 1. Ambil file dari direktori penyimpanan backup (lokal backups/ atau /tmp/backups di serverless)
+        const backupsDir = backupService.getBackupsDir();
         if (fs.existsSync(backupsDir)) {
             const localFiles = fs.readdirSync(backupsDir).filter(f => f.endsWith(".sql"));
             localFiles.forEach(f => {
@@ -122,8 +122,8 @@ exports.downloadBackup = async (req, res) => {
             });
         }
 
-        // 1. Periksa apakah file tersedia di folder lokal
-        const backupsDir = path.join(__dirname, "../backups");
+        // 1. Periksa apakah file tersedia di folder penyimpanan backup (lokal atau /tmp)
+        const backupsDir = backupService.getBackupsDir();
         const localFilePath = path.join(backupsDir, fileName);
 
         if (fs.existsSync(localFilePath)) {

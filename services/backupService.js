@@ -1,14 +1,44 @@
 const mysqldump = require("mysqldump");
 const fs = require("fs");
 const path = require("path");
+const os = require("os");
 let supabase = null;
 try {
     supabase = require("../config/supabase");
 } catch (_) {}
 
 /**
+ * Menentukan direktori penyimpanan backup yang aman:
+ * - Pada Vercel Serverless (read-only filesystem), gunakan os.tmpdir() (/tmp/backups)
+ * - Pada lokal / cPanel (writable filesystem), gunakan direktori 'backups/' di root project
+ */
+function getBackupsDir() {
+    if (process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME) {
+        const tmpDir = path.join(os.tmpdir(), "backups");
+        if (!fs.existsSync(tmpDir)) {
+            try {
+                fs.mkdirSync(tmpDir, { recursive: true });
+            } catch (e) {
+                return os.tmpdir();
+            }
+        }
+        return tmpDir;
+    }
+
+    const localDir = path.join(__dirname, "../backups");
+    if (!fs.existsSync(localDir)) {
+        try {
+            fs.mkdirSync(localDir, { recursive: true });
+        } catch (e) {
+            return os.tmpdir();
+        }
+    }
+    return localDir;
+}
+
+/**
  * Membuat backup database MySQL/MariaDB secara asinkron
- * Mendukung penyimpanan lokal di folder backups/ dan sinkronisasi ke Supabase Storage (jika tersedia)
+ * Mendukung penyimpanan di direktori aman (lokal /tmp) dan sinkronisasi ke Supabase Storage (jika aktif)
  */
 async function backupDatabase() {
     const now = new Date();
@@ -23,10 +53,13 @@ async function backupDatabase() {
     if (isSsl) {
         sslConfig = {
             minVersion: "TLSv1.2",
-            rejectUnauthorized: true
+            rejectUnauthorized: false
         };
         if (fs.existsSync(tidbCaPath)) {
-            sslConfig.ca = fs.readFileSync(tidbCaPath, "utf8");
+            try {
+                sslConfig.ca = fs.readFileSync(tidbCaPath, "utf8");
+                sslConfig.rejectUnauthorized = true;
+            } catch (_) {}
         }
     }
 
@@ -80,16 +113,13 @@ async function backupDatabase() {
 
     const fileBuffer = Buffer.from(sqlBackup, "utf8");
 
-    // 1. Simpan salinan lokal di folder 'backups/'
-    const backupsDir = path.join(__dirname, "../backups");
-    if (!fs.existsSync(backupsDir)) {
-        fs.mkdirSync(backupsDir, { recursive: true });
-    }
+    // 1. Simpan ke direktori yang aman (lokal backups/ atau /tmp/backups di Vercel)
+    const backupsDir = getBackupsDir();
     const localFilePath = path.join(backupsDir, fileName);
     fs.writeFileSync(localFilePath, fileBuffer);
-    console.log(`💾 [BACKUP] Tersimpan lokal: ${localFilePath} (${fileBuffer.length} bytes)`);
+    console.log(`💾 [BACKUP] Tersimpan di disk: ${localFilePath} (${fileBuffer.length} bytes)`);
 
-    // 2. Upload ke Supabase Storage jika dikonfigurasi
+    // 2. Upload ke Supabase Storage jika dikonfigurasi dan aktif
     let uploadedToCloud = false;
     if (supabase && process.env.SUPABASE_BUCKET && process.env.SUPABASE_URL && !process.env.SUPABASE_URL.includes("placeholder")) {
         try {
@@ -104,10 +134,10 @@ async function backupDatabase() {
                 uploadedToCloud = true;
                 console.log(`☁️ [BACKUP] Tersinkronisasi ke Supabase Storage: ${fileName}`);
             } else {
-                console.warn(`⚠️ [BACKUP] Sinkronisasi Supabase gagal (tetap aman secara lokal): ${error.message}`);
+                console.warn(`⚠️ [BACKUP] Sinkronisasi Supabase gagal (tetap aman di disk): ${error.message}`);
             }
         } catch (sbErr) {
-            console.warn(`⚠️ [BACKUP] Supabase offline/error (tetap aman secara lokal): ${sbErr.message}`);
+            console.warn(`⚠️ [BACKUP] Supabase offline/error (tetap aman di disk): ${sbErr.message}`);
         }
     }
 
@@ -122,5 +152,6 @@ async function backupDatabase() {
 }
 
 module.exports = {
-    backupDatabase
+    backupDatabase,
+    getBackupsDir
 };
