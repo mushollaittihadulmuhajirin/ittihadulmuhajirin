@@ -27,19 +27,51 @@ function checkLogin(req, res, next) {
 }
 
 // ======================================
+// ======================================
+// DAFTAR MASTER BLOK DEFAULT (FALLBACK JIKA TABEL BELUM DIMIGRASI DI PRODUCTION)
+// ======================================
+const DAFTAR_BLOK_DEFAULT = [
+    "A01", "A02", "A03", "A04", "A05", "A06", "A07", "A08", "A09", "A10", "A11", "A12A", "A12B", "A15", "A16", "A17", "A18",
+    "B01", "B02", "B03", "B04", "B05", "B07", "B08", "B09", "B10",
+    "C03", "C05", "C06", "C07", "C08", "C09", "C10",
+    "D01", "D02", "D03", "D04", "D05", "D07", "D08", "D09", "D18",
+    "H01", "H02", "H05", "H06", "H08", "H15",
+    "I01", "I02", "I03", "I04", "I05", "I06", "I07", "I08", "I09", "I10", "I11", "I12", "I14", "I15", "I16", "I17", "I18",
+    "J01", "J02", "J03", "J04", "J05", "J06", "J07", "J08", "J09", "J10", "J11", "J12", "J14", "J15", "J16", "J17", "J18",
+    "K01", "K02", "K03", "K04", "K05", "K06", "K07", "K08", "K09", "K10", "K11", "K12", "K14", "K15", "K16", "K17", "K18",
+    "L01", "L02", "L03", "L04", "L05", "L06", "L07", "L08", "L09", "L10"
+];
+
+// ======================================
 // API: GET /api/master-blok (PUBLIC)
 // ======================================
 function apiMasterBlok(req, res) {
     const rawQ = req.query.q || "";
     const q = String(rawQ).trim().toUpperCase();
 
+    function sendFallback() {
+        let results = DAFTAR_BLOK_DEFAULT;
+        if (q) {
+            results = DAFTAR_BLOK_DEFAULT.filter(b => b.startsWith(q));
+            if (results.length === 0) {
+                results = DAFTAR_BLOK_DEFAULT.filter(b => b.includes(q));
+            }
+        }
+        return res.json({
+            success: true,
+            total: results.length,
+            data: results,
+            fallback: true
+        });
+    }
+
     if (!q) {
         // Kembalikan seluruh blok aktif diurutkan abjad
         const sql = `SELECT id, kode_blok FROM master_blok WHERE aktif = 1 ORDER BY kode_blok ASC`;
         db.query(sql, (err, rows) => {
             if (err) {
-                console.error("Gagal mengambil master blok:", err);
-                return res.status(500).json({ success: false, error: "Gagal mengambil data master blok" });
+                console.warn("Gagal mengambil master blok dari DB, menggunakan daftar resmi fallback:", err.message);
+                return sendFallback();
             }
             res.json({
                 success: true,
@@ -61,8 +93,8 @@ function apiMasterBlok(req, res) {
 
     db.query(prefixSql, [`${q}%`], (err, rows) => {
         if (err) {
-            console.error("Gagal mencari master blok:", err);
-            return res.status(500).json({ success: false, error: "Gagal memproses pencarian blok" });
+            console.warn("Gagal mencari master blok prefix di DB, fallback:", err.message);
+            return sendFallback();
         }
 
         if (rows.length > 0) {
@@ -84,8 +116,8 @@ function apiMasterBlok(req, res) {
         `;
         db.query(subSql, [`%${q}%`], (errSub, subRows) => {
             if (errSub) {
-                console.error("Gagal mencari master blok substring:", errSub);
-                return res.status(500).json({ success: false, error: "Gagal memproses pencarian blok" });
+                console.warn("Gagal mencari master blok substring di DB, fallback:", errSub.message);
+                return sendFallback();
             }
 
             res.json({
