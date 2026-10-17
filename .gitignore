@@ -1,2 +1,18 @@
 node_modules
 .env
+.vercel
+.env*
+*.pem
+
+# Backups and SQL dumps
+backups/
+backup-*/
+new backup db 22 08 2026/
+verify-backup/
+*.sql
+*.zip
+
+# Local test runners & scratch
+scratch/
+test-*.js
+start_local_server.js

@@ -1,8 +1,8 @@
 const express = require("express");
 const router = express.Router();
+const { renderLaporanPage } = require("./laporan");
 
-router.get("/", (req,res)=>{
-    res.render("index");
-});
+// GET / langsung menampilkan laporan keuangan (menggunakan controller dan view yang sama dengan /laporan)
+router.get("/", renderLaporanPage);
 
-module.exports = router;
+module.exports = router;

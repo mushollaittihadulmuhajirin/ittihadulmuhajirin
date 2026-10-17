@@ -1,4 +1,6 @@
 const transaksiModel = require("../models/transaksiModel");
+const saldoService = require("../services/saldoService");
+const db = require("../config/db");
 
 exports.index = async (req, res) => {
 
@@ -9,7 +11,8 @@ exports.index = async (req, res) => {
             rekening,
             transaksi,
             donasi,
-            inventaris
+            inventaris,
+            ringkasanSaldo
         ] = await Promise.all([
 
             transaksiModel.getKategori(),
@@ -20,28 +23,19 @@ exports.index = async (req, res) => {
 
             transaksiModel.getDonasi(),
 
-            transaksiModel.getInventaris()
+            transaksiModel.getInventaris(),
+
+            saldoService.getRingkasanSaldo(db)
 
         ]);
 
-        let pemasukan = 0;
-        let pengeluaran = 0;
+        const pemasukan = ringkasanSaldo.totalMasuk;
+        const pengeluaran = ringkasanSaldo.totalKeluar;
+        const saldo = ringkasanSaldo.saldoTotal;
+        const saldoTotal = ringkasanSaldo.saldoTotal;
+        const saldoTunai = ringkasanSaldo.saldoTunai;
+        const saldoNonTunai = ringkasanSaldo.saldoNonTunai;
 
-        transaksi.forEach(item => {
-
-            if (item.jenis === "masuk")
-                pemasukan += Number(item.nominal || 0);
-
-            else
-                pengeluaran += Number(item.nominal || 0);
-
-        });
-
-        const saldo = pemasukan - pengeluaran;
-console.log("================================");
-console.log("JUMLAH KATEGORI :", kategori.length);
-console.log(kategori);
-console.log("================================");
         res.render("transaksi", {
 
             kategori,
@@ -58,7 +52,15 @@ console.log("================================");
 
             pengeluaran,
 
-            saldo
+            saldo,
+
+            saldoTotal,
+
+            saldoTunai,
+
+            saldoNonTunai,
+
+            tanggalCutoff: ringkasanSaldo.tanggalCutoff
 
         });
 

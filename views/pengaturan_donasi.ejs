@@ -1,0 +1,238 @@
+<%- include("partials/header", { title: "Pengaturan Donasi & QRIS — DKM Crystal" }) %>
+<%- include("partials/navbar") %>
+
+<div class="container my-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-xl-10">
+
+            <!-- PAGE HEADER -->
+            <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-2 border-bottom">
+                <div>
+                    <h2 class="h3 fw-bold mb-1">
+                        <i class="bi bi-wallet2 text-success me-2"></i>Pengaturan Rekening &amp; QRIS
+                    </h2>
+                    <p class="text-muted mb-0 small">
+                        Kelola data rekening bank dan kode QRIS donasi yang tampil di halaman laporan publik.
+                    </p>
+                </div>
+                <div class="d-flex gap-2 mt-2 mt-md-0">
+                    <a href="/laporan" target="_blank" class="btn btn-outline-success btn-sm">
+                        <i class="bi bi-box-arrow-up-right me-1"></i>Lihat Halaman Laporan
+                    </a>
+                    <a href="/rekening" class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-arrow-left me-1"></i>Kembali ke Rekening
+                    </a>
+                </div>
+            </div>
+
+            <!-- ALERT NOTIFIKASI -->
+            <% if (status === 'sukses') { %>
+                <div class="alert alert-success alert-dismissible fade show d-flex align-items-center" role="alert">
+                    <i class="bi bi-check-circle-fill me-2 fs-5"></i>
+                    <div>
+                        <strong>Berhasil Disimpan!</strong> Pengaturan informasi rekening dan QRIS telah diperbarui di database.
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            <% } %>
+
+            <% if (error) { %>
+                <div class="alert alert-danger alert-dismissible fade show d-flex align-items-center" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
+                    <div>
+                        <strong>Gagal Menyimpan:</strong> <%= error %>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            <% } %>
+
+            <!-- FORM PENGATURAN -->
+            <form action="/pengaturan-donasi/simpan" method="POST" enctype="multipart/form-data">
+
+                <!-- 1. PENGATURAN UMUM PANEL -->
+                <div class="card shadow-sm border-0 mb-4 rounded-3">
+                    <div class="card-header bg-dark text-white py-3">
+                        <h5 class="card-title mb-0 fs-6 fw-bold">
+                            <i class="bi bi-sliders me-2 text-warning"></i>1. Pengaturan Tampilan Panel
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-8">
+                                <label for="judul_panel" class="form-label fw-semibold">Judul Panel Informasi</label>
+                                <input type="text" class="form-control" id="judul_panel" name="judul_panel" 
+                                    value="<%= data.judul_panel || 'Informasi Rekening & Donasi' %>" required>
+                                <div class="form-text">Judul yang tampil di bagian atas panel donasi halaman laporan.</div>
+                            </div>
+                            <div class="col-md-4 d-flex align-items-center">
+                                <div class="form-check form-switch mt-3 mt-md-0">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="tampil_panel" name="tampil_panel" value="1" <%= data.tampil_panel ? 'checked' : '' %>>
+                                    <label class="form-check-label fw-semibold" for="tampil_panel">Tampilkan Panel Donasi</label>
+                                    <div class="form-text">Jika dimatikan, seluruh panel rekening &amp; QRIS disembunyikan dari publik.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-4 mb-4">
+                    <!-- 2. PENGATURAN REKENING TRANSFER BANK -->
+                    <div class="col-12 col-lg-6">
+                        <div class="card shadow-sm border-0 h-100 rounded-3">
+                            <div class="card-header bg-primary text-white py-3 d-flex justify-content-between align-items-center">
+                                <h5 class="card-title mb-0 fs-6 fw-bold">
+                                    <i class="bi bi-bank2 me-2"></i>2. Rekening Transfer Bank
+                                </h5>
+                                <div class="form-check form-switch mb-0">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="tampil_bank" name="tampil_bank" value="1" <%= data.tampil_bank ? 'checked' : '' %>>
+                                    <label class="form-check-label text-white small" for="tampil_bank">Aktifkan</label>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="bank_nama" class="form-label fw-semibold">Nama Bank</label>
+                                    <input type="text" class="form-control" id="bank_nama" name="bank_nama" 
+                                        value="<%= data.bank_nama || 'Mandiri' %>" required placeholder="Contoh: Mandiri, BSI, BCA">
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="bank_rekening" class="form-label fw-semibold">Nomor Rekening</label>
+                                    <input type="text" class="form-control font-monospace" id="bank_rekening" name="bank_rekening" 
+                                        value="<%= data.bank_rekening || '1220013513869' %>" required placeholder="Contoh: 1220013513869">
+                                    <div class="form-text">Nomor rekening persis yang akan disalin otomatis oleh tombol Salin.</div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="bank_atas_nama" class="form-label fw-semibold">Atas Nama (Pemilik Rekening)</label>
+                                    <input type="text" class="form-control" id="bank_atas_nama" name="bank_atas_nama" 
+                                        value="<%= data.bank_atas_nama || 'Muhammad Riyadi' %>" required placeholder="Contoh: Muhammad Riyadi">
+                                </div>
+
+                                <div class="p-3 bg-light rounded-3 border">
+                                    <div class="small text-muted mb-1"><i class="bi bi-info-circle me-1"></i>Pratinjau Teks Salin:</div>
+                                    <div class="font-monospace fw-bold text-primary" id="previewRekeningText"><%= data.bank_rekening || '1220013513869' %></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. PENGATURAN QRIS -->
+                    <div class="col-12 col-lg-6">
+                        <div class="card shadow-sm border-0 h-100 rounded-3">
+                            <div class="card-header bg-success text-white py-3 d-flex justify-content-between align-items-center">
+                                <h5 class="card-title mb-0 fs-6 fw-bold">
+                                    <i class="bi bi-qr-code-scan me-2"></i>3. Donasi Melalui QRIS
+                                </h5>
+                                <div class="form-check form-switch mb-0">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="tampil_qris" name="tampil_qris" value="1" <%= data.tampil_qris ? 'checked' : '' %>>
+                                    <label class="form-check-label text-white small" for="tampil_qris">Aktifkan</label>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="qris_judul" class="form-label fw-semibold">Judul Bagian QRIS</label>
+                                    <input type="text" class="form-control" id="qris_judul" name="qris_judul" 
+                                        value="<%= data.qris_judul || 'Donasi melalui QRIS' %>">
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="qris_petunjuk" class="form-label fw-semibold">Teks Petunjuk Donasi</label>
+                                    <textarea class="form-control" id="qris_petunjuk" name="qris_petunjuk" rows="2"><%= data.qris_petunjuk || 'Pindai kode QR untuk berdonasi dengan aplikasi pembayaran yang mendukung QRIS.' %></textarea>
+                                </div>
+
+                                <div class="row g-2 mb-3">
+                                    <div class="col-sm-6">
+                                        <label for="qris_merchant" class="form-label fw-semibold">Nama Merchant</label>
+                                        <input type="text" class="form-control" id="qris_merchant" name="qris_merchant" 
+                                            value="<%= data.qris_merchant || 'MUSHOLA AL MUHAJIRIN' %>">
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <label for="qris_nmid" class="form-label fw-semibold">NMID</label>
+                                        <input type="text" class="form-control font-monospace" id="qris_nmid" name="qris_nmid" 
+                                            value="<%= data.qris_nmid || 'ID1024347808734' %>">
+                                    </div>
+                                </div>
+
+                                <!-- STATUS QRIS -->
+                                <div class="mb-3">
+                                    <label for="qris_status" class="form-label fw-semibold">Status Keabsahan QRIS</label>
+                                    <select class="form-select" id="qris_status" name="qris_status" onchange="updateKeteranganDefault(this.value)">
+                                        <option value="Menunggu QRIS resmi" <%= data.qris_status === 'Menunggu QRIS resmi' ? 'selected' : '' %>>Menunggu QRIS resmi (Default Awal)</option>
+                                        <option value="Aktif" <%= data.qris_status === 'Aktif' ? 'selected' : '' %>>Aktif (Resmi &amp; Siap Terima Donasi)</option>
+                                    </select>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="qris_keterangan_status" class="form-label fw-semibold">Keterangan Status QRIS</label>
+                                    <textarea class="form-control" id="qris_keterangan_status" name="qris_keterangan_status" rows="2"><%= data.qris_keterangan_status || 'QRIS belum diaktifkan untuk pembayaran sampai status dan keabsahannya dikonfirmasi oleh pengelola.' %></textarea>
+                                </div>
+
+                                <!-- UPLOAD GAMBAR QRIS -->
+                                <div class="mb-3">
+                                    <label for="qris_gambar_file" class="form-label fw-semibold">Unggah / Ganti Gambar QRIS</label>
+                                    <input class="form-control" type="file" id="qris_gambar_file" name="qris_gambar_file" accept="image/png, image/jpeg, image/jpg, image/webp" onchange="previewImage(event)">
+                                    <div class="form-text">Format: PNG, JPG, JPEG, WEBP. Maksimal 2MB. Biarkan kosong jika tidak ingin mengganti gambar.</div>
+                                </div>
+
+                                <!-- PRATINJAU GAMBAR QRIS -->
+                                <div class="text-center p-3 bg-light rounded-3 border">
+                                    <div class="small text-muted mb-2 fw-semibold">Pratinjau Gambar QRIS:</div>
+                                    <img id="qrisPreviewImg" src="<%= data.qris_gambar || '/images/qris/qris-mushola-al-muhajirin.jpg' %>" alt="QRIS Preview" class="img-thumbnail shadow-sm" style="max-height: 180px; object-fit: contain;">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SUBMIT BUTTONS -->
+                <div class="d-flex justify-content-end gap-2 mb-5">
+                    <a href="/rekening" class="btn btn-secondary px-4">Batal</a>
+                    <button type="submit" class="btn btn-success px-5 fw-bold">
+                        <i class="bi bi-save2 me-1"></i>Simpan Perubahan
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    function updateKeteranganDefault(val) {
+        const ket = document.getElementById('qris_keterangan_status');
+        if (!ket) return;
+        if (val === 'Aktif') {
+            ket.value = 'QRIS resmi aktif dan telah dikonfirmasi oleh pengelola DKM Ittihadul Muhajirin.';
+        } else if (val === 'Menunggu QRIS resmi') {
+            ket.value = 'QRIS belum diaktifkan untuk pembayaran sampai status dan keabsahannya dikonfirmasi oleh pengelola.';
+        }
+    }
+
+    function previewImage(event) {
+        const input = event.target;
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+            if (file.size > 2 * 1024 * 1024) {
+                alert("Ukuran file melebihi 2MB! Silakan pilih file yang lebih kecil.");
+                input.value = "";
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const preview = document.getElementById('qrisPreviewImg');
+                if (preview) {
+                    preview.src = e.target.result;
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    document.getElementById('bank_rekening').addEventListener('input', function(e) {
+        document.getElementById('previewRekeningText').textContent = e.target.value;
+    });
+</script>
+
+<%- include("partials/footer") %>
+

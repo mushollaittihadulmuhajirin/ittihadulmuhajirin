@@ -8,32 +8,212 @@
     display:flex;
     justify-content:space-between;
     align-items:center;
-    margin-bottom:25px;
+    margin-bottom:20px;
+    flex-wrap:wrap;
+    gap:12px;
 }
 
 .dashboard-title{
     font-weight:700;
+    margin-bottom:2px;
 }
 
 .shadow-soft{
     border:none;
-    border-radius:15px;
-    box-shadow:0 5px 18px rgba(0,0,0,.08);
+    border-radius:16px;
+    box-shadow:0 4px 18px rgba(0,0,0,.06);
 }
 
 .form-section{
     display:none;
 }
 
-.table td{
+.table td, .table th{
     vertical-align:middle;
 }
 
 .badge{
-    font-size:13px;
+    font-size:12px;
+    font-weight:600;
+}
+
+/* 5 SUMMARY CARDS */
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+}
+@media (max-width: 1200px) {
+    .summary-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+@media (max-width: 768px) {
+    .summary-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .summary-card:nth-child(3) {
+        grid-column: span 2;
+    }
+}
+@media (max-width: 480px) {
+    .summary-grid {
+        grid-template-columns: 1fr;
+    }
+    .summary-card:nth-child(3) {
+        grid-column: span 1;
+    }
+}
+.summary-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 16px 14px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 104px;
+}
+.summary-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px -2px rgba(0, 0, 0, 0.08);
+}
+.summary-card-inner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.summary-icon-circle {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+.summary-icon-square {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+.icon-masuk { background: #059669; color: #ffffff; }
+.icon-keluar { background: #ef4444; color: #ffffff; }
+.icon-saldo { background: #2563eb; color: #ffffff; }
+.icon-tunai { background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; }
+.icon-nontunai { background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; }
+.summary-info { min-width: 0; flex-grow: 1; }
+.summary-title {
+    font-size: 0.76rem;
+    font-weight: 600;
+    color: #64748b;
+    margin-bottom: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+.summary-amount {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin: 0;
+    line-height: 1.25;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.amount-masuk { color: #059669; }
+.amount-keluar { color: #dc2626; }
+.amount-saldo { color: #2563eb; }
+.amount-tunai { color: #059669; }
+.amount-nontunai { color: #2563eb; }
+.summary-subtext {
+    font-size: 0.72rem;
+    color: #94a3b8;
+    margin: 4px 0 0 0;
+}
+
+/* TABLE CONTROLS & PAGINATION */
+.table-filter-bar {
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 12px 16px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+}
+.table-filter-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.table-pagination-footer {
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+    padding: 10px 16px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+.btn-page-step {
+    border: 1px solid #cbd5e1;
+    background: #ffffff;
+    color: #334155;
+    border-radius: 8px;
+    padding: 4px 10px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+.btn-page-step:hover:not(:disabled) {
+    background: #e2e8f0;
+}
+.btn-page-step:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+.btn-page-step.active {
+    background: #059669;
+    color: #ffffff;
+    border-color: #059669;
+    font-weight: 700;
+}
+.page-size-select {
+    padding: 4px 8px;
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+    font-size: 0.82rem;
+    background-color: #ffffff;
+}
+.pagination-info {
+    font-size: 0.82rem;
+    color: #64748b;
+    font-weight: 500;
 }
 
 </style>
+
+<%
+function formatRpTampilan(val, isDecimal) {
+    const num = Number(val || 0);
+    if (isDecimal) {
+        return num.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+    return Math.round(num).toLocaleString('id-ID');
+}
+%>
 
 <div class="container-fluid">
 
@@ -43,14 +223,12 @@
 
 <h2 class="dashboard-title">
 
-💰 Input Transaksi DKM
+💰 Input Transaksi &amp; Operasional DKM
 
 </h2>
 
 <small class="text-muted">
-
-Keuangan • Donasi Barang • Inventaris Masjid
-
+Keuangan • Donasi Barang • Inventaris Masjid &bull; <span class="badge bg-light text-dark border">Cut-Off: <%= typeof tanggalCutoff !== 'undefined' ? tanggalCutoff : '2026-10-16' %></span>
 </small>
 
 </div>
@@ -58,72 +236,90 @@ Keuangan • Donasi Barang • Inventaris Masjid
 </div>
 
 <!-- ===================================================== -->
-<!-- RINGKASAN -->
+<!-- 5 KARTU RINGKASAN RESMI KEUANGAN -->
 <!-- ===================================================== -->
 
-<div class="row mb-4">
+<section class="summary-grid" aria-label="Ringkasan Keuangan Resmi">
+    <!-- Kartu 1: Total Masuk -->
+    <div class="summary-card">
+        <div class="summary-card-inner">
+            <div class="summary-icon-circle icon-masuk">
+                <i class="bi bi-arrow-up-right"></i>
+            </div>
+            <div class="summary-info">
+                <div class="summary-title">Total Masuk</div>
+                <div class="summary-amount amount-masuk" title="Rp <%= formatRpTampilan(pemasukan || 0, false) %>">
+                    Rp <%= formatRpTampilan(pemasukan || 0, false) %>
+                </div>
+                <div class="summary-subtext">Seluruh pemasukan</div>
+            </div>
+        </div>
+    </div>
 
-<div class="col-lg-4">
+    <!-- Kartu 2: Total Keluar -->
+    <div class="summary-card">
+        <div class="summary-card-inner">
+            <div class="summary-icon-circle icon-keluar">
+                <i class="bi bi-arrow-down-left"></i>
+            </div>
+            <div class="summary-info">
+                <div class="summary-title">Total Keluar</div>
+                <div class="summary-amount amount-keluar" title="Rp <%= formatRpTampilan(pengeluaran || 0, false) %>">
+                    Rp <%= formatRpTampilan(pengeluaran || 0, false) %>
+                </div>
+                <div class="summary-subtext">Seluruh pengeluaran</div>
+            </div>
+        </div>
+    </div>
 
-<div class="card shadow-soft">
+    <!-- Kartu 3: Saldo Total -->
+    <div class="summary-card">
+        <div class="summary-card-inner">
+            <div class="summary-icon-square icon-saldo">
+                <i class="bi bi-wallet2"></i>
+            </div>
+            <div class="summary-info">
+                <div class="summary-title">Saldo</div>
+                <div class="summary-amount amount-saldo" title="Rp <%= formatRpTampilan(saldoTotal || saldo || 0, false) %>">
+                    Rp <%= formatRpTampilan(saldoTotal || saldo || 0, false) %>
+                </div>
+                <div class="summary-subtext">Masuk - Keluar</div>
+            </div>
+        </div>
+    </div>
 
-<div class="card-body text-center">
+    <!-- Kartu 4: Saldo Tunai -->
+    <div class="summary-card">
+        <div class="summary-card-inner">
+            <div class="summary-icon-square icon-tunai">
+                <i class="bi bi-cash-stack"></i>
+            </div>
+            <div class="summary-info">
+                <div class="summary-title">Saldo Tunai</div>
+                <div class="summary-amount amount-tunai" title="Rp <%= formatRpTampilan(saldoTunai || 0, false) %>">
+                    Rp <%= formatRpTampilan(saldoTunai || 0, false) %>
+                </div>
+                <div class="summary-subtext">Kas &amp; Dompet</div>
+            </div>
+        </div>
+    </div>
 
-<h6>Saldo Kas</h6>
-
-<h3 class="text-success">
-
-Rp <%= Number(saldo||0).toLocaleString("id-ID") %>
-
-</h3>
-
-</div>
-
-</div>
-
-</div>
-
-<div class="col-lg-4">
-
-<div class="card shadow-soft">
-
-<div class="card-body text-center">
-
-<h6>Total Pemasukan</h6>
-
-<h3 class="text-primary">
-
-Rp <%= Number(pemasukan||0).toLocaleString("id-ID") %>
-
-</h3>
-
-</div>
-
-</div>
-
-</div>
-
-<div class="col-lg-4">
-
-<div class="card shadow-soft">
-
-<div class="card-body text-center">
-
-<h6>Total Pengeluaran</h6>
-
-<h3 class="text-danger">
-
-Rp <%= Number(pengeluaran||0).toLocaleString("id-ID") %>
-
-</h3>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
+    <!-- Kartu 5: Saldo Non-Tunai -->
+    <div class="summary-card">
+        <div class="summary-card-inner">
+            <div class="summary-icon-square icon-nontunai">
+                <i class="bi bi-bank"></i>
+            </div>
+            <div class="summary-info">
+                <div class="summary-title">Saldo Non-Tunai</div>
+                <div class="summary-amount amount-nontunai" title="Rp <%= formatRpTampilan(saldoNonTunai || 0, true) %>">
+                    Rp <%= formatRpTampilan(saldoNonTunai || 0, true) %>
+                </div>
+                <div class="summary-subtext">Bank Mandiri</div>
+            </div>
+        </div>
+    </div>
+</section>
 
 <!-- ===================================================== -->
 <!-- FORM -->
@@ -834,69 +1030,106 @@ Reset
 
 </div>
 <!-- ===================================================== -->
-<!-- RIWAYAT TRANSAKSI UANG -->
+<!-- 1. RIWAYAT TRANSAKSI UANG -->
 <!-- ===================================================== -->
 
 <div class="card shadow-soft mt-4">
 
-    <div class="card-header bg-success text-white">
-
+    <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
         <h5 class="mb-0">
-
             💰 Riwayat Transaksi Uang
-
         </h5>
-
+        <span class="badge bg-light text-dark fw-bold">
+            <%= (transaksi && transaksi.length) ? transaksi.length : 0 %> Data
+        </span>
     </div>
 
-    <div class="card-body table-responsive">
+    <!-- Filter Bar Uang -->
+    <div class="table-filter-bar">
+        <div class="input-group input-group-sm" style="max-width: 250px;">
+            <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+            <input type="text" id="searchUang" class="form-control" placeholder="Cari keterangan, nominal...">
+        </div>
 
-        <table class="table table-bordered table-hover align-middle">
+        <div class="table-filter-item">
+            <span class="small text-muted">Jenis:</span>
+            <select id="filterJenisUang" class="form-select form-select-sm" style="width: auto;">
+                <option value="semua">Semua Jenis</option>
+                <option value="masuk">Pemasukan</option>
+                <option value="keluar">Pengeluaran</option>
+            </select>
+        </div>
+
+        <div class="table-filter-item">
+            <span class="small text-muted">Metode:</span>
+            <select id="filterMetodeUang" class="form-select form-select-sm" style="width: auto;">
+                <option value="semua">Semua Metode</option>
+                <option value="tunai">Tunai</option>
+                <option value="transfer">Non Tunai</option>
+            </select>
+        </div>
+
+        <div class="table-filter-item">
+            <span class="small text-muted">Dari:</span>
+            <input type="date" id="filterMulaiUang" class="form-control form-control-sm" style="width: auto;">
+        </div>
+
+        <div class="table-filter-item">
+            <span class="small text-muted">Sampai:</span>
+            <input type="date" id="filterSampaiUang" class="form-control form-control-sm" style="width: auto;">
+        </div>
+
+        <button type="button" id="btnResetUang" class="btn btn-outline-secondary btn-sm ms-auto">
+            <i class="bi bi-arrow-counterclockwise"></i> Reset
+        </button>
+    </div>
+
+    <div class="card-body p-0 table-responsive">
+
+        <table class="table table-bordered table-hover align-middle mb-0">
 
             <thead class="table-light">
 
                 <tr>
 
-                    <th width="40">No</th>
+                    <th width="45" class="text-center">No</th>
 
-                    <th>Tanggal</th>
+                    <th>📅 Tanggal</th>
 
-                    <th>Jenis</th>
+                    <th>💳 Jenis</th>
 
-                    <th>Kategori</th>
+                    <th>📂 Kategori</th>
 
-                    <th>Metode</th>
+                    <th>🏦 Metode</th>
 
-                    <th>Rekening</th>
+                    <th>💳 Rekening</th>
 
-                    <th class="text-end">Nominal</th>
+                    <th class="text-end">💰 Nominal</th>
 
-                    <th>Keterangan</th>
+                    <th>📝 Keterangan</th>
 
-                    <th width="170">Aksi</th>
+                    <th width="150" class="text-center">⚡ Aksi</th>
 
                 </tr>
 
             </thead>
 
-            <tbody>
+            <tbody id="tbodyUang">
 
             <% if(transaksi && transaksi.length){ %>
 
                 <% transaksi.forEach(function(item,index){ %>
 
-                <tr>
+                <tr data-tanggal="<%= item.tanggal ? new Date(item.tanggal).toISOString().slice(0,10) : '' %>"
+                    data-jenis="<%= (item.jenis || '').toLowerCase().trim() %>"
+                    data-metode="<%= (item.metode || '').toLowerCase().trim() %>">
 
-                    <td>
-
+                    <td class="text-center text-muted">
                         <%= index+1 %>
-
                     </td>
 
                     <td>
-
                         <%= new Date(item.tanggal).toLocaleDateString("id-ID") %>
-
                     </td>
 
                     <td>
@@ -904,17 +1137,13 @@ Reset
                         <% if(item.jenis==="masuk"){ %>
 
                             <span class="badge bg-success">
-
-                                Pemasukan
-
+                                <i class="bi bi-arrow-up-right me-1"></i>Pemasukan
                             </span>
 
                         <% }else{ %>
 
                             <span class="badge bg-danger">
-
-                                Pengeluaran
-
+                                <i class="bi bi-arrow-down-left me-1"></i>Pengeluaran
                             </span>
 
                         <% } %>
@@ -922,9 +1151,7 @@ Reset
                     </td>
 
                     <td>
-
                         <%= item.kategori || "-" %>
-
                     </td>
 
                     <td>
@@ -932,17 +1159,13 @@ Reset
                         <% if(item.metode==="transfer"){ %>
 
                             <span class="badge bg-primary">
-
-                                Non Tunai
-
+                                <i class="bi bi-bank me-1"></i>Non Tunai
                             </span>
 
                         <% }else{ %>
 
                             <span class="badge bg-secondary">
-
-                                Tunai
-
+                                <i class="bi bi-cash me-1"></i>Tunai
                             </span>
 
                         <% } %>
@@ -963,7 +1186,7 @@ Reset
 
                     </td>
 
-                    <td class="text-end">
+                    <td class="text-end fw-bold <%= item.jenis === 'masuk' ? 'text-success' : 'text-danger' %>">
 
                         Rp <%= Number(item.nominal||0).toLocaleString("id-ID") %>
 
@@ -975,24 +1198,24 @@ Reset
 
                     </td>
 
-                    <td>
+                    <td class="text-center">
 
-                        <a
-                        href="/transaksi/edit/<%= item.id %>"
-                        class="btn btn-warning btn-sm">
+                        <div class="btn-group btn-group-sm">
+                            <a
+                            href="/transaksi/edit/<%= item.id %>"
+                            class="btn btn-warning btn-sm"
+                            title="Edit Transaksi">
+                                ✏ Edit
+                            </a>
 
-                            ✏ Edit
-
-                        </a>
-
-                        <a
-                        href="/transaksi/hapus/<%= item.id %>"
-                        class="btn btn-danger btn-sm"
-                        onclick="return confirm('Hapus transaksi ini?')">
-
-                            🗑 Hapus
-
-                        </a>
+                            <a
+                            href="/transaksi/hapus/<%= item.id %>"
+                            class="btn btn-danger btn-sm"
+                            title="Hapus Transaksi"
+                            onclick="return confirm('Hapus transaksi ini?')">
+                                🗑 Hapus
+                            </a>
+                        </div>
 
                     </td>
 
@@ -1004,9 +1227,9 @@ Reset
 
                 <tr>
 
-                    <td colspan="9" class="text-center text-muted">
+                    <td colspan="9" class="text-center text-muted py-4">
 
-                        Belum ada transaksi.
+                        Belum ada data transaksi uang.
 
                     </td>
 
@@ -1020,164 +1243,193 @@ Reset
 
     </div>
 
+    <!-- Pagination Footer Uang -->
+    <div class="table-pagination-footer">
+        <div class="d-flex align-items-center gap-2">
+            <span class="pagination-info" id="infoUang">Menampilkan 0 data</span>
+            <div class="d-flex align-items-center gap-1 ms-2">
+                <span class="small text-muted">Baris:</span>
+                <select id="pageSizeUang" class="page-size-select">
+                    <option value="10" selected>10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="all">Semua</option>
+                </select>
+            </div>
+        </div>
+        <div class="d-flex align-items-center gap-1" id="navUang"></div>
+    </div>
+
 </div>
 
 <!-- ===================================================== -->
-<!-- RIWAYAT DONASI BARANG -->
+<!-- 2. RIWAYAT DONASI BARANG -->
 <!-- ===================================================== -->
 
 <div class="card shadow-soft mt-4">
 
-    <div class="card-header bg-warning">
-
+    <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
         <h5 class="mb-0">
-
             🎁 Riwayat Donasi Barang
-
         </h5>
-
+        <span class="badge bg-light text-dark fw-bold">
+            <%= (donasi && donasi.length) ? donasi.length : 0 %> Data
+        </span>
     </div>
 
-    <div class="card-body table-responsive">
+    <!-- Filter Bar Donasi -->
+    <div class="table-filter-bar">
+        <div class="input-group input-group-sm" style="max-width: 250px;">
+            <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+            <input type="text" id="searchDonasi" class="form-control" placeholder="Cari donatur, barang...">
+        </div>
 
-        <table class="table table-bordered table-hover align-middle">
+        <div class="table-filter-item">
+            <span class="small text-muted">Kondisi:</span>
+            <select id="filterKondisiDonasi" class="form-select form-select-sm" style="width: auto;">
+                <option value="semua">Semua Kondisi</option>
+                <option value="baru">Baru</option>
+                <option value="bekas">Bekas</option>
+                <option value="service">Service</option>
+            </select>
+        </div>
+
+        <div class="table-filter-item">
+            <span class="small text-muted">Dari:</span>
+            <input type="date" id="filterMulaiDonasi" class="form-control form-control-sm" style="width: auto;">
+        </div>
+
+        <div class="table-filter-item">
+            <span class="small text-muted">Sampai:</span>
+            <input type="date" id="filterSampaiDonasi" class="form-control form-control-sm" style="width: auto;">
+        </div>
+
+        <button type="button" id="btnResetDonasi" class="btn btn-outline-secondary btn-sm ms-auto">
+            <i class="bi bi-arrow-counterclockwise"></i> Reset
+        </button>
+    </div>
+
+    <div class="card-body p-0 table-responsive">
+
+        <table class="table table-bordered table-hover align-middle mb-0">
 
             <thead class="table-light">
 
                 <tr>
 
-                    <th width="40">No</th>
+                    <th width="45" class="text-center">No</th>
 
-                    <th>Tanggal</th>
+                    <th>📅 Tanggal</th>
 
-                    <th>Donatur</th>
+                    <th>👤 Donatur</th>
 
-                    <th>Barang</th>
+                    <th>🎁 Nama Barang</th>
 
-                    <th>Kategori</th>
+                    <th>📂 Kategori</th>
 
-                    <th>Jumlah</th>
+                    <th>🔢 Jumlah</th>
 
-                    <th>Kondisi</th>
+                    <th>🏷 Kondisi</th>
 
-                    <th class="text-end">Estimasi</th>
+                    <th class="text-end">💰 Estimasi</th>
 
-                    <th>Keterangan</th>
+                    <th>📝 Keterangan</th>
 
-                    <th width="170">Aksi</th>
+                    <th width="150" class="text-center">⚡ Aksi</th>
 
                 </tr>
 
             </thead>
 
-            <tbody>
+            <tbody id="tbodyDonasi">
 
             <% if(donasi && donasi.length){ %>
 
                 <% donasi.forEach(function(item,index){ %>
 
-                <tr>
+                <tr data-tanggal="<%= item.tanggal ? new Date(item.tanggal).toISOString().slice(0,10) : '' %>"
+                    data-kondisi="<%= (item.kondisi || '').toLowerCase().trim() %>">
 
-                    <td>
-
+                    <td class="text-center text-muted">
                         <%= index+1 %>
-
                     </td>
 
                     <td>
-
                         <%= new Date(item.tanggal).toLocaleDateString("id-ID") %>
-
                     </td>
 
                     <td>
-
-                        <%= item.nama_donatur || "-" %>
-
+                        <strong><%= item.nama_donatur || "-" %></strong>
                     </td>
 
                     <td>
-
-                        <strong>
-
-                            <%= item.nama_barang %>
-
-                        </strong>
-
+                        <%= item.nama_barang %>
                     </td>
 
                     <td>
-
                         <%= item.kategori || "-" %>
-
                     </td>
 
                     <td>
-
                         <%= item.jumlah %> <%= item.satuan %>
-
                     </td>
 
                     <td>
 
-    <% if((item.kondisi || "").toLowerCase() === "baru"){ %>
+                    <% if((item.kondisi || "").toLowerCase() === "baru"){ %>
 
-        <span class="badge bg-success">
-            Baru
-        </span>
+                        <span class="badge bg-success">
+                            Baru
+                        </span>
 
-    <% }else if((item.kondisi || "").toLowerCase() === "bekas"){ %>
+                    <% }else if((item.kondisi || "").toLowerCase() === "bekas"){ %>
 
-        <span class="badge bg-warning text-dark">
-            Bekas
-        </span>
+                        <span class="badge bg-warning text-dark">
+                            Bekas
+                        </span>
 
-    <% }else if((item.kondisi || "").toLowerCase() === "service"){ %>
+                    <% }else if((item.kondisi || "").toLowerCase() === "service"){ %>
 
-        <span class="badge bg-danger">
-            Service
-        </span>
+                        <span class="badge bg-danger">
+                            Service
+                        </span>
 
-    <% }else{ %>
+                    <% }else{ %>
 
-        <span class="badge bg-secondary">
-            <%= item.kondisi %>
-        </span>
+                        <span class="badge bg-secondary">
+                            <%= item.kondisi || "-" %>
+                        </span>
 
-    <% } %>
+                    <% } %>
 
-</td>
+                    </td>
 
-                    <td class="text-end">
-
+                    <td class="text-end fw-semibold">
                         Rp <%= Number(item.estimasi_harga||0).toLocaleString("id-ID") %>
-
                     </td>
 
                     <td>
-
                         <%= item.keterangan || "-" %>
-
                     </td>
 
-                    <td>
+                    <td class="text-center">
 
-                        <a
-                        href="/transaksi/edit-donasi/<%= item.id %>"
-                        class="btn btn-warning btn-sm">
+                        <div class="btn-group btn-group-sm">
+                            <a
+                            href="/transaksi/edit-donasi/<%= item.id %>"
+                            class="btn btn-warning btn-sm"
+                            title="Edit Donasi">
+                                ✏ Edit
+                            </a>
 
-                            ✏ Edit
-
-                        </a>
-
-                        <a
-                        href="/transaksi/hapus-donasi/<%= item.id %>"
-                        class="btn btn-danger btn-sm"
-                        onclick="return confirm('Hapus donasi barang ini?')">
-
-                            🗑 Hapus
-
-                        </a>
+                            <a
+                            href="/transaksi/hapus-donasi/<%= item.id %>"
+                            class="btn btn-danger btn-sm"
+                            title="Hapus Donasi"
+                            onclick="return confirm('Hapus donasi barang ini?')">
+                                🗑 Hapus
+                            </a>
+                        </div>
 
                     </td>
 
@@ -1189,7 +1441,7 @@ Reset
 
                 <tr>
 
-                    <td colspan="10" class="text-center text-muted">
+                    <td colspan="10" class="text-center text-muted py-4">
 
                         Belum ada data donasi barang.
 
@@ -1205,163 +1457,204 @@ Reset
 
     </div>
 
-</div>
-<!-- ===================================================== -->
-<!-- RIWAYAT INVENTARIS MASJID -->
-<!-- ===================================================== -->
-
-<div class="card shadow-soft mt-4">
-
-    <div class="card-header bg-primary text-white">
-
-        <h5 class="mb-0">
-
-            📦 Inventaris Masjid
-
-        </h5>
-
+    <!-- Pagination Footer Donasi -->
+    <div class="table-pagination-footer">
+        <div class="d-flex align-items-center gap-2">
+            <span class="pagination-info" id="infoDonasi">Menampilkan 0 data</span>
+            <div class="d-flex align-items-center gap-1 ms-2">
+                <span class="small text-muted">Baris:</span>
+                <select id="pageSizeDonasi" class="page-size-select">
+                    <option value="10" selected>10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="all">Semua</option>
+                </select>
+            </div>
+        </div>
+        <div class="d-flex align-items-center gap-1" id="navDonasi"></div>
     </div>
 
-    <div class="card-body table-responsive">
+</div>
 
-        <table class="table table-bordered table-hover align-middle">
+<!-- ===================================================== -->
+<!-- 3. RIWAYAT INVENTARIS MASJID -->
+<!-- ===================================================== -->
+
+<div class="card shadow-soft mt-4" id="tabelInventaris">
+
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <h5 class="mb-0">
+            📦 Inventaris Masjid
+        </h5>
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+            <span class="badge bg-light text-dark fw-bold">
+                <%= (inventaris && inventaris.length) ? inventaris.length : 0 %> Jenis
+            </span>
+            <span class="badge bg-light text-primary fw-bold">
+                <%= (inventaris && inventaris.length) ? inventaris.reduce((acc, i) => acc + Number(i.jumlah || 0), 0) : 0 %> Unit
+            </span>
+            <span class="badge bg-warning text-dark fw-bold">
+                Rp <%= (inventaris && inventaris.length) ? inventaris.reduce((acc, i) => acc + Number(i.nilai_estimasi || 0), 0).toLocaleString("id-ID") : 0 %>
+            </span>
+            <a href="/aset" class="btn btn-sm btn-light text-primary py-0 px-2 fw-semibold" title="Buka Halaman Rekap Aset Khusus">
+                Rekap Detail &rarr;
+            </a>
+        </div>
+    </div>
+
+    <!-- Filter Bar Inventaris -->
+    <div class="table-filter-bar">
+        <div class="input-group input-group-sm" style="max-width: 250px;">
+            <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+            <input type="text" id="searchInventaris" class="form-control" placeholder="Cari nama aset, lokasi...">
+        </div>
+
+        <div class="table-filter-item">
+            <span class="small text-muted">Kondisi:</span>
+            <select id="filterKondisiInventaris" class="form-select form-select-sm" style="width: auto;">
+                <option value="semua">Semua Kondisi</option>
+                <option value="baru">Baru</option>
+                <option value="bekas">Bekas</option>
+                <option value="service">Service</option>
+            </select>
+        </div>
+
+        <div class="table-filter-item">
+            <span class="small text-muted">Dari:</span>
+            <input type="date" id="filterMulaiInventaris" class="form-control form-control-sm" style="width: auto;">
+        </div>
+
+        <div class="table-filter-item">
+            <span class="small text-muted">Sampai:</span>
+            <input type="date" id="filterSampaiInventaris" class="form-control form-control-sm" style="width: auto;">
+        </div>
+
+        <button type="button" id="btnResetInventaris" class="btn btn-outline-secondary btn-sm ms-auto">
+            <i class="bi bi-arrow-counterclockwise"></i> Reset
+        </button>
+    </div>
+
+    <div class="card-body p-0 table-responsive">
+
+        <table class="table table-bordered table-hover align-middle mb-0">
 
             <thead class="table-light">
 
                 <tr>
 
-                    <th width="40">No</th>
+                    <th width="45" class="text-center">No</th>
 
-                    <th>Tanggal Masuk</th>
+                    <th>📅 Tanggal Masuk</th>
 
-                    <th>Nama Aset</th>
+                    <th>📦 Nama Aset</th>
 
-                    <th>Kategori</th>
+                    <th>📂 Kategori</th>
 
-                    <th>Jumlah</th>
+                    <th>🔢 Jumlah</th>
 
-                    <th>Kondisi</th>
+                    <th>🏷 Kondisi</th>
 
-                    <th>Lokasi</th>
+                    <th>📍 Lokasi</th>
 
-                    <th class="text-end">Nilai Estimasi</th>
+                    <th class="text-end">💰 Nilai Estimasi</th>
 
-                    <th>Keterangan</th>
+                    <th>📝 Keterangan</th>
 
-                    <th width="170">Aksi</th>
+                    <th width="150" class="text-center">⚡ Aksi</th>
 
                 </tr>
 
             </thead>
 
-            <tbody>
+            <tbody id="tbodyInventaris">
 
             <% if(inventaris && inventaris.length){ %>
 
                 <% inventaris.forEach(function(item,index){ %>
 
-                <tr>
+                <tr data-tanggal="<%= item.tanggal_masuk ? new Date(item.tanggal_masuk).toISOString().slice(0,10) : '' %>"
+                    data-kondisi="<%= (item.kondisi || '').toLowerCase().trim() %>">
 
-                    <td>
-
+                    <td class="text-center text-muted">
                         <%= index+1 %>
-
                     </td>
 
                     <td>
-
-                        <%= new Date(item.tanggal_masuk).toLocaleDateString("id-ID") %>
-
+                        <%= item.tanggal_masuk ? new Date(item.tanggal_masuk).toLocaleDateString("id-ID") : "-" %>
                     </td>
 
                     <td>
-
-                        <strong>
-
-                            <%= item.nama_aset %>
-
-                        </strong>
-
+                        <strong><%= item.nama_aset %></strong>
                     </td>
 
                     <td>
-
                         <%= item.kategori || "-" %>
-
                     </td>
 
                     <td>
-
                         <%= item.jumlah %> <%= item.satuan %>
-
                     </td>
 
                     <td>
 
-<% if((item.kondisi || "").toLowerCase()=="baru"){ %>
+                    <% if((item.kondisi || "").toLowerCase()=="baru"){ %>
 
-<span class="badge bg-success">
-Baru
-</span>
+                        <span class="badge bg-success">
+                            Baru
+                        </span>
 
-<% }else if((item.kondisi || "").toLowerCase()=="bekas"){ %>
+                    <% }else if((item.kondisi || "").toLowerCase()=="bekas"){ %>
 
-<span class="badge bg-warning text-dark">
-Bekas
-</span>
+                        <span class="badge bg-warning text-dark">
+                            Bekas
+                        </span>
 
-<% }else if((item.kondisi || "").toLowerCase()=="service"){ %>
+                    <% }else if((item.kondisi || "").toLowerCase()=="service"){ %>
 
-<span class="badge bg-danger">
-Service
-</span>
+                        <span class="badge bg-danger">
+                            Service
+                        </span>
 
-<% }else{ %>
+                    <% }else{ %>
 
-<span class="badge bg-secondary">
-<%= item.kondisi %>
-</span>
+                        <span class="badge bg-secondary">
+                            <%= item.kondisi || "-" %>
+                        </span>
 
-<% } %>
+                    <% } %>
 
-</td>
+                    </td>
 
                     <td>
-
                         <%= item.lokasi || "-" %>
-
                     </td>
 
-                    <td class="text-end">
-
+                    <td class="text-end fw-semibold">
                         Rp <%= Number(item.nilai_estimasi||0).toLocaleString("id-ID") %>
-
                     </td>
 
                     <td>
-
                         <%= item.keterangan || "-" %>
-
                     </td>
 
-                    <td>
+                    <td class="text-center">
 
-                        <a
-                        href="/transaksi/edit-inventaris/<%= item.id %>"
-                        class="btn btn-warning btn-sm">
+                        <div class="btn-group btn-group-sm">
+                            <a
+                            href="/transaksi/edit-inventaris/<%= item.id %>"
+                            class="btn btn-warning btn-sm"
+                            title="Edit Inventaris">
+                                ✏ Edit
+                            </a>
 
-                            ✏ Edit
-
-                        </a>
-
-                        <a
-                        href="/transaksi/hapus-inventaris/<%= item.id %>"
-                        class="btn btn-danger btn-sm"
-                        onclick="return confirm('Hapus inventaris ini?')">
-
-                            🗑 Hapus
-
-                        </a>
+                            <a
+                            href="/transaksi/hapus-inventaris/<%= item.id %>"
+                            class="btn btn-danger btn-sm"
+                            title="Hapus Inventaris"
+                            onclick="return confirm('Hapus inventaris ini?')">
+                                🗑 Hapus
+                            </a>
+                        </div>
 
                     </td>
 
@@ -1373,7 +1666,7 @@ Service
 
                 <tr>
 
-                    <td colspan="10" class="text-center text-muted">
+                    <td colspan="10" class="text-center text-muted py-4">
 
                         Belum ada data inventaris.
 
@@ -1389,7 +1682,27 @@ Service
 
     </div>
 
+    <!-- Pagination Footer Inventaris -->
+    <div class="table-pagination-footer">
+        <div class="d-flex align-items-center gap-2">
+            <span class="pagination-info" id="infoInventaris">Menampilkan 0 data</span>
+            <div class="d-flex align-items-center gap-1 ms-2">
+                <span class="small text-muted">Baris:</span>
+                <select id="pageSizeInventaris" class="page-size-select">
+                    <option value="10" selected>10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="all">Semua</option>
+                </select>
+            </div>
+        </div>
+        <div class="d-flex align-items-center gap-1" id="navInventaris"></div>
+    </div>
+
 </div>
+
+</div><!-- end container-fluid -->
+
 <script>
 
 /* =====================================================
@@ -1433,6 +1746,8 @@ const formInventaris=document.getElementById("formInventaris");
 
 function tampilkanForm(){
 
+    if(!formUang || !formDonasi || !formInventaris) return;
+
     formUang.style.display="none";
     formDonasi.style.display="none";
     formInventaris.style.display="none";
@@ -1457,9 +1772,25 @@ function tampilkanForm(){
 
 }
 
+// Deteksi parameter URL untuk pemilihan tab formulir otomatis (misal: ?jenis=inventaris)
+try {
+    const urlParams = new URLSearchParams(window.location.search);
+    const targetType = urlParams.get("jenis") || urlParams.get("tab") || urlParams.get("tipe");
+    if (targetType && jenisInput) {
+        const cleanType = targetType.toLowerCase().trim();
+        if (cleanType === "inventaris" || cleanType === "donasi" || cleanType === "uang") {
+            jenisInput.value = cleanType;
+        }
+    }
+} catch (e) {
+    console.error("URL param error:", e);
+}
+
 tampilkanForm();
 
-jenisInput.addEventListener("change",tampilkanForm);
+if(jenisInput){
+    jenisInput.addEventListener("change",tampilkanForm);
+}
 
 
 /* =====================================================
@@ -1538,4 +1869,226 @@ document.querySelectorAll("form").forEach(function(frm){
 
 });
 
+/* =====================================================
+   UNIVERSAL TABLE PAGINATOR & FILTER (INDEPENDENT)
+===================================================== */
+
+class AdminTablePaginator {
+    constructor(config) {
+        this.tbody = document.getElementById(config.tbodyId);
+        this.infoEl = document.getElementById(config.infoId);
+        this.navEl = document.getElementById(config.navId);
+        this.pageSizeSelect = document.getElementById(config.pageSizeId);
+        this.searchInput = document.getElementById(config.searchId);
+        this.filterMulai = document.getElementById(config.mulaiId);
+        this.filterSampai = document.getElementById(config.sampaiId);
+        this.filterJenis = config.jenisId ? document.getElementById(config.jenisId) : null;
+        this.filterMetode = config.metodeId ? document.getElementById(config.metodeId) : null;
+        this.filterKondisi = config.kondisiId ? document.getElementById(config.kondisiId) : null;
+        this.btnReset = document.getElementById(config.resetId);
+
+        if (!this.tbody) return;
+        this.allRows = Array.from(this.tbody.querySelectorAll("tr"));
+        this.currentPage = 1;
+        this.pageSize = 10;
+
+        this.init();
+    }
+
+    init() {
+        if (this.pageSizeSelect) {
+            this.pageSizeSelect.addEventListener("change", (e) => {
+                const v = e.target.value;
+                this.pageSize = (v === "all") ? 999999 : parseInt(v);
+                this.currentPage = 1;
+                this.render();
+            });
+        }
+
+        const triggerFilter = () => {
+            this.currentPage = 1;
+            this.render();
+        };
+
+        if (this.searchInput) this.searchInput.addEventListener("input", triggerFilter);
+        if (this.filterMulai) this.filterMulai.addEventListener("change", triggerFilter);
+        if (this.filterSampai) this.filterSampai.addEventListener("change", triggerFilter);
+        if (this.filterJenis) this.filterJenis.addEventListener("change", triggerFilter);
+        if (this.filterMetode) this.filterMetode.addEventListener("change", triggerFilter);
+        if (this.filterKondisi) this.filterKondisi.addEventListener("change", triggerFilter);
+
+        if (this.btnReset) {
+            this.btnReset.addEventListener("click", () => {
+                if (this.searchInput) this.searchInput.value = "";
+                if (this.filterMulai) this.filterMulai.value = "";
+                if (this.filterSampai) this.filterSampai.value = "";
+                if (this.filterJenis) this.filterJenis.value = "semua";
+                if (this.filterMetode) this.filterMetode.value = "semua";
+                if (this.filterKondisi) this.filterKondisi.value = "semua";
+                this.currentPage = 1;
+                this.render();
+            });
+        }
+
+        this.render();
+    }
+
+    getFilteredRows() {
+        const query = (this.searchInput ? this.searchInput.value : "").toLowerCase().trim();
+        const mulai = this.filterMulai ? this.filterMulai.value : "";
+        const sampai = this.filterSampai ? this.filterSampai.value : "";
+        const jenis = this.filterJenis ? this.filterJenis.value : "semua";
+        const metode = this.filterMetode ? this.filterMetode.value : "semua";
+        const kondisi = this.filterKondisi ? this.filterKondisi.value : "semua";
+
+        return this.allRows.filter(row => {
+            // Ignore placeholder row if table has no data
+            if (row.cells.length <= 1) return false;
+
+            // Search query across row text content
+            if (query && !row.textContent.toLowerCase().includes(query)) {
+                return false;
+            }
+
+            // Date filter
+            const rowTanggal = row.dataset.tanggal || "";
+            if (mulai && rowTanggal && rowTanggal < mulai) return false;
+            if (sampai && rowTanggal && rowTanggal > sampai) return false;
+
+            // Jenis filter
+            if (jenis !== "semua" && (row.dataset.jenis || "") !== jenis) {
+                return false;
+            }
+
+            // Metode filter
+            if (metode !== "semua" && (row.dataset.metode || "") !== metode) {
+                return false;
+            }
+
+            // Kondisi filter
+            if (kondisi !== "semua" && (row.dataset.kondisi || "") !== kondisi) {
+                return false;
+            }
+
+            return true;
+        });
+    }
+
+    goToPage(page) {
+        this.currentPage = page;
+        this.render();
+    }
+
+    render() {
+        const activeRows = this.getFilteredRows();
+        const total = activeRows.length;
+        const totalPages = Math.max(1, Math.ceil(total / this.pageSize));
+
+        if (this.currentPage > totalPages) this.currentPage = totalPages;
+        if (this.currentPage < 1) this.currentPage = 1;
+
+        const startIdx = (this.currentPage - 1) * this.pageSize;
+        const endIdx = startIdx + this.pageSize;
+
+        // Hide all rows
+        this.allRows.forEach(r => r.style.display = "none");
+
+        // Show active slice
+        activeRows.slice(startIdx, endIdx).forEach(r => r.style.display = "");
+
+        // Update info text
+        if (this.infoEl) {
+            if (total === 0) {
+                this.infoEl.textContent = "Menampilkan 0 data";
+            } else {
+                const displayStart = startIdx + 1;
+                const displayEnd = Math.min(endIdx, total);
+                this.infoEl.textContent = `Menampilkan ${displayStart}–${displayEnd} dari ${total} data`;
+            }
+        }
+
+        // Render nav buttons
+        if (this.navEl) {
+            this.navEl.innerHTML = "";
+            if (totalPages > 1) {
+                // Prev btn
+                const prevBtn = document.createElement("button");
+                prevBtn.type = "button";
+                prevBtn.className = "btn-page-step";
+                prevBtn.innerHTML = "<i class='bi bi-chevron-left'></i> Prev";
+                prevBtn.disabled = (this.currentPage === 1);
+                prevBtn.addEventListener("click", () => this.goToPage(this.currentPage - 1));
+                this.navEl.appendChild(prevBtn);
+
+                // Number buttons (max 5)
+                let startPage = Math.max(1, this.currentPage - 2);
+                let endPage = Math.min(totalPages, startPage + 4);
+                if (endPage - startPage < 4) {
+                    startPage = Math.max(1, endPage - 4);
+                }
+
+                for (let i = startPage; i <= endPage; i++) {
+                    const pageBtn = document.createElement("button");
+                    pageBtn.type = "button";
+                    pageBtn.className = "btn-page-step" + (i === this.currentPage ? " active" : "");
+                    pageBtn.textContent = i;
+                    pageBtn.addEventListener("click", () => this.goToPage(i));
+                    this.navEl.appendChild(pageBtn);
+                }
+
+                // Next btn
+                const nextBtn = document.createElement("button");
+                nextBtn.type = "button";
+                nextBtn.className = "btn-page-step";
+                nextBtn.innerHTML = "Next <i class='bi bi-chevron-right'></i>";
+                nextBtn.disabled = (this.currentPage === totalPages);
+                nextBtn.addEventListener("click", () => this.goToPage(this.currentPage + 1));
+                this.navEl.appendChild(nextBtn);
+            }
+        }
+    }
+}
+
+// Inisialisasi Paginator Independen untuk ketiga tabel
+document.addEventListener("DOMContentLoaded", function() {
+    window.paginatorUang = new AdminTablePaginator({
+        tbodyId: "tbodyUang",
+        infoId: "infoUang",
+        navId: "navUang",
+        pageSizeId: "pageSizeUang",
+        searchId: "searchUang",
+        mulaiId: "filterMulaiUang",
+        sampaiId: "filterSampaiUang",
+        jenisId: "filterJenisUang",
+        metodeId: "filterMetodeUang",
+        resetId: "btnResetUang"
+    });
+
+    window.paginatorDonasi = new AdminTablePaginator({
+        tbodyId: "tbodyDonasi",
+        infoId: "infoDonasi",
+        navId: "navDonasi",
+        pageSizeId: "pageSizeDonasi",
+        searchId: "searchDonasi",
+        mulaiId: "filterMulaiDonasi",
+        sampaiId: "filterSampaiDonasi",
+        kondisiId: "filterKondisiDonasi",
+        resetId: "btnResetDonasi"
+    });
+
+    window.paginatorInventaris = new AdminTablePaginator({
+        tbodyId: "tbodyInventaris",
+        infoId: "infoInventaris",
+        navId: "navInventaris",
+        pageSizeId: "pageSizeInventaris",
+        searchId: "searchInventaris",
+        mulaiId: "filterMulaiInventaris",
+        sampaiId: "filterSampaiInventaris",
+        kondisiId: "filterKondisiInventaris",
+        resetId: "btnResetInventaris"
+    });
+});
+
 </script>
+
+<%- include("partials/footer") %>

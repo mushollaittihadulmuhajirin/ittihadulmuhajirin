@@ -9,13 +9,11 @@ const restoreController = require("../controllers/restoreController");
 // Middleware Login
 // =========================
 function checkLogin(req, res, next) {
-
     if (!req.session?.user) {
-        return res.redirect("/");
+        return res.redirect("/login");
     }
 
     next();
-
 }
 
 // =========================

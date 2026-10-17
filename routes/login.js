@@ -31,22 +31,16 @@ router.post("/", (req, res) => {
 
             // Support password lama (plaintext)
             if (admin.password === password) {
-
                 cocok = true;
-
             } else {
-
                 try {
-
                     cocok = await bcrypt.compare(
                         password,
                         admin.password
                     );
-
                 } catch (e) {
                     console.log(e);
                 }
-
             }
 
             if (!cocok) {

@@ -3,116 +3,239 @@
 
 <%- include("partials/navbar") %>
 
-<div class="page-header">
+<style>
+/* 5 SUMMARY CARDS */
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+}
+@media (max-width: 1200px) {
+    .summary-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+@media (max-width: 768px) {
+    .summary-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .summary-card:nth-child(3) {
+        grid-column: span 2;
+    }
+}
+@media (max-width: 576px) {
+    .summary-grid {
+        grid-template-columns: 1fr;
+    }
+    .summary-card:nth-child(3) {
+        grid-column: span 1;
+    }
+}
+.summary-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 16px 14px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 104px;
+}
+.summary-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px -2px rgba(0, 0, 0, 0.08);
+}
+.summary-card-inner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.summary-icon-circle {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+.summary-icon-square {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+.icon-masuk { background: #059669; color: #ffffff; }
+.icon-keluar { background: #ef4444; color: #ffffff; }
+.icon-saldo { background: #2563eb; color: #ffffff; }
+.icon-tunai { background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; }
+.icon-nontunai { background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; }
+.summary-info { min-width: 0; flex-grow: 1; }
+.summary-title {
+    font-size: 0.76rem;
+    font-weight: 600;
+    color: #64748b;
+    margin-bottom: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+.summary-amount {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin: 0;
+    line-height: 1.25;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.amount-masuk { color: #059669; }
+.amount-keluar { color: #dc2626; }
+.amount-saldo { color: #2563eb; }
+.amount-tunai { color: #059669; }
+.amount-nontunai { color: #2563eb; }
+.summary-subtext {
+    font-size: 0.72rem;
+    color: #94a3b8;
+    margin: 4px 0 0 0;
+}
+</style>
+
+<%
+function formatRpTampilan(val, isDecimal) {
+    const num = Number(val || 0);
+    if (isDecimal) {
+        return num.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+    return Math.round(num).toLocaleString('id-ID');
+}
+%>
+
+<div class="admin-page-header">
 
     <div>
 
-        <h2 class="dashboard-title">
+        <h1 class="admin-page-title d-flex align-items-center gap-2">
+            <img src="/images/hero/logo-dkm-muhajirin.png" alt="Logo Masjid Ittihadul Muhajirin" class="dashboard-header-logo">
+            <span>Dashboard Utama Pengurus DKM</span>
+        </h1>
 
-            Dashboard Keuangan Masjid
+        <div class="admin-page-subtitle">
+            <span>Monitoring Keuangan, Inventaris, Donasi</span> &bull; <span class="badge bg-light text-dark border">Cut-Off Resmi: <%= typeof tanggalCutoff !== 'undefined' ? tanggalCutoff : '2026-10-16' %></span>
+        </div>
 
-        </h2>
+    </div>
 
-        <small class="text-muted">
-
-            Monitoring Keuangan, Inventaris & Donasi Barang
-
-        </small>
-
+    <div class="d-flex flex-wrap gap-2">
+        <a href="/transaksi" class="btn btn-success btn-sm fw-semibold">
+            <i class="bi bi-plus-circle"></i> Input Transaksi
+        </a>
+        <a href="/laporan" class="btn btn-outline-primary btn-sm">
+            <i class="bi bi-box-arrow-up-right"></i> Laporan Publik
+        </a>
     </div>
 
 </div>
 
 
 <!-- =============================
-RINGKASAN KEUANGAN
+5 KARTU RINGKASAN KEUANGAN RESMI
 ============================== -->
 
-<div class="row">
+<section class="summary-grid" aria-label="Ringkasan Keuangan Resmi">
+    <!-- Kartu 1: Total Masuk -->
+    <div class="summary-card">
+        <div class="summary-card-inner">
+            <div class="summary-icon-circle icon-masuk">
+                <i class="bi bi-arrow-up-right"></i>
+            </div>
+            <div class="summary-info">
+                <div class="summary-title">Total Masuk</div>
+                <div class="summary-amount amount-masuk" title="Rp <%= formatRpTampilan(pemasukan || 0, false) %>">
+                    Rp <%= formatRpTampilan(pemasukan || 0, false) %>
+                </div>
+                <div class="summary-subtext">Seluruh pemasukan</div>
+            </div>
+        </div>
+    </div>
 
-<div class="col-lg-4 col-md-6 mb-4">
+    <!-- Kartu 2: Total Keluar -->
+    <div class="summary-card">
+        <div class="summary-card-inner">
+            <div class="summary-icon-circle icon-keluar">
+                <i class="bi bi-arrow-down-left"></i>
+            </div>
+            <div class="summary-info">
+                <div class="summary-title">Total Keluar</div>
+                <div class="summary-amount amount-keluar" title="Rp <%= formatRpTampilan(pengeluaran || 0, false) %>">
+                    Rp <%= formatRpTampilan(pengeluaran || 0, false) %>
+                </div>
+                <div class="summary-subtext">Seluruh pengeluaran</div>
+            </div>
+        </div>
+    </div>
 
-<div class="info-card bg-saldo">
+    <!-- Kartu 3: Saldo Total -->
+    <div class="summary-card">
+        <div class="summary-card-inner">
+            <div class="summary-icon-square icon-saldo">
+                <i class="bi bi-wallet2"></i>
+            </div>
+            <div class="summary-info">
+                <div class="summary-title">Saldo</div>
+                <div class="summary-amount amount-saldo" title="Rp <%= formatRpTampilan(saldoTotal || saldo || 0, false) %>">
+                    Rp <%= formatRpTampilan(saldoTotal || saldo || 0, false) %>
+                </div>
+                <div class="summary-subtext">Masuk - Keluar</div>
+            </div>
+        </div>
+    </div>
 
-<div class="big-icon">
-    
-<i class="fa-solid fa-wallet"></i>
-</div>
+    <!-- Kartu 4: Saldo Tunai -->
+    <div class="summary-card">
+        <div class="summary-card-inner">
+            <div class="summary-icon-square icon-tunai">
+                <i class="bi bi-cash-stack"></i>
+            </div>
+            <div class="summary-info">
+                <div class="summary-title">Saldo Tunai</div>
+                <div class="summary-amount amount-tunai" title="Rp <%= formatRpTampilan(saldoTunai || 0, false) %>">
+                    Rp <%= formatRpTampilan(saldoTunai || 0, false) %>
+                </div>
+                <div class="summary-subtext">Kas &amp; Dompet</div>
+            </div>
+        </div>
+    </div>
 
-<h5>
-
-Saldo Saat Ini
-
-</h5>
-
-<h2>
-
-Rp <%= Number(saldo).toLocaleString("id-ID") %>
-
-</h2>
-
-</div>
-
-</div>
-
-<div class="col-lg-4 col-md-6 mb-4">
-
-<div class="info-card bg-masuk">
-
-<div class="big-icon">
-
-<i class="fa-solid fa-arrow-down"></i>
-
-</div>
-
-<h5>
-
-Total Pemasukan
-
-</h5>
-
-<h2>
-
-Rp <%= Number(pemasukan).toLocaleString("id-ID") %>
-
-</h2>
-
-</div>
-
-</div>
-
-<div class="col-lg-4 col-md-6 mb-4">
-
-<div class="info-card bg-keluar">
-
-<div class="big-icon">
-
-<i class="fa-solid fa-arrow-up"></i>
-
-</div>
-
-<h5>
-
-Total Pengeluaran
-
-</h5>
-
-<h2>
-
-Rp <%= Number(pengeluaran).toLocaleString("id-ID") %>
-
-</h2>
-
-</div>
-
-</div>
-
-</div>
+    <!-- Kartu 5: Saldo Non-Tunai -->
+    <div class="summary-card">
+        <div class="summary-card-inner">
+            <div class="summary-icon-square icon-nontunai">
+                <i class="bi bi-bank"></i>
+            </div>
+            <div class="summary-info">
+                <div class="summary-title">Saldo Non-Tunai</div>
+                <div class="summary-amount amount-nontunai" title="Rp <%= formatRpTampilan(saldoNonTunai || 0, true) %>">
+                    Rp <%= formatRpTampilan(saldoNonTunai || 0, true) %>
+                </div>
+                <div class="summary-subtext">Bank Mandiri</div>
+            </div>
+        </div>
+    </div>
+</section>
 
 
 
 <!-- =============================
-ASET
+RINGKASAN INVENTARIS
 ============================== -->
 
 <div class="row">
@@ -123,7 +246,7 @@ ASET
 
 <div class="big-icon">
 
-<i class="fa-solid fa-box"></i>
+<i class="bi bi-box-seam"></i>
 
 </div>
 
@@ -135,7 +258,7 @@ Total Jenis Aset
 
 <h2>
 
-<%= total_aset %>
+<%= total_aset %> Jenis
 
 </h2>
 
@@ -149,19 +272,19 @@ Total Jenis Aset
 
 <div class="big-icon">
 
-<i class="fa-solid fa-gift"></i>
+<i class="bi bi-gift"></i>
 
 </div>
 
 <h5>
 
-Jumlah Barang
+Jumlah Barang / Unit
 
 </h5>
 
 <h2>
 
-<%= total_barang %>
+<%= Number(total_barang).toLocaleString("id-ID") %> Unit
 
 </h2>
 
@@ -175,7 +298,7 @@ Jumlah Barang
 
 <div class="big-icon">
 
-<i class="fa-solid fa-building"></i>
+<i class="bi bi-building"></i>
 
 </div>
 
@@ -200,87 +323,111 @@ Rp <%= Number(nilai_aset).toLocaleString("id-ID") %>
 
 
 <!-- =============================
-MENU CEPAT
+MENU CEPAT LENGKAP
 ============================== -->
 
 <div class="section">
 
 <h4 class="section-title">
-🚀 Menu Cepat
+🚀 Menu Cepat &amp; Modul Operasional
 </h4>
 
-<div class="row g-4">
+<div class="row g-3">
 
 <div class="col-lg-3 col-md-6">
-
 <a href="/transaksi" class="quick-card quick-transaksi">
-
-<div class="icon">
-💰
+<div class="icon fs-3">
+<i class="bi bi-cash-stack text-success"></i>
 </div>
-
 <h4>Transaksi</h4>
-
 <p>
-Input pemasukan dan pengeluaran kas masjid.
+Input kas pemasukan &amp; pengeluaran masjid.
 </p>
-
 </a>
-
 </div>
 
 <div class="col-lg-3 col-md-6">
-
 <a href="/aset" class="quick-card quick-aset">
-
-<div class="icon">
-📦
+<div class="icon fs-3">
+<i class="bi bi-box-seam text-warning"></i>
 </div>
-
 <h4>Inventaris</h4>
-
 <p>
-Kelola aset dan barang inventaris masjid.
+Kelola aset dan sarana prasarana masjid.
 </p>
-
 </a>
-
 </div>
 
 <div class="col-lg-3 col-md-6">
-
 <a href="/laporan" class="quick-card quick-laporan">
-
-<div class="icon">
-📊
+<div class="icon fs-3">
+<i class="bi bi-file-earmark-bar-graph text-primary"></i>
 </div>
-
-<h4>Laporan</h4>
-
+<h4>Laporan Publik</h4>
 <p>
-Lihat laporan keuangan secara realtime.
+Lihat laporan realtime, unduh PDF &amp; Excel.
 </p>
-
 </a>
-
 </div>
 
 <div class="col-lg-3 col-md-6">
-
 <a href="/rekening" class="quick-card quick-rekening">
-
-<div class="icon">
-🏦
+<div class="icon fs-3">
+<i class="bi bi-bank text-info"></i>
+</div>
+<h4>Rekening</h4>
+<p>
+Kelola rekening bank dan saldo kas DKM.
+</p>
+</a>
 </div>
 
-<h4>Rekening</h4>
-
+<div class="col-lg-3 col-md-6">
+<a href="/pengaturan-donasi" class="quick-card" style="border-left: 4px solid #f59e0b;">
+<div class="icon fs-3">
+<i class="bi bi-qr-code-scan text-warning"></i>
+</div>
+<h4>QRIS</h4>
 <p>
-Kelola rekening bank dan kas DKM.
+Pengaturan nomor rekening bank &amp; gambar QRIS.
 </p>
-
 </a>
+</div>
 
+<div class="col-lg-3 col-md-6">
+<a href="/saran" class="quick-card" style="border-left: 4px solid #06b6d4;">
+<div class="icon fs-3">
+<i class="bi bi-chat-heart text-info"></i>
+</div>
+<h4>Saran Warga</h4>
+<p>
+Kelola aspirasi &amp; masukan warga jamaah.
+</p>
+</a>
+</div>
+
+<div class="col-lg-3 col-md-6">
+<a href="/master-blok" class="quick-card" style="border-left: 4px solid #8b5cf6;">
+<div class="icon fs-3">
+<i class="bi bi-grid-3x3-gap text-primary"></i>
+</div>
+<h4>Master Blok</h4>
+<p>
+Kelola daftar resmi kode blok perumahan.
+</p>
+</a>
+</div>
+
+<div class="col-lg-3 col-md-6">
+<a href="/kategori" class="quick-card" style="border-left: 4px solid #10b981;">
+<div class="icon fs-3">
+<i class="bi bi-tags text-success"></i>
+</div>
+<h4>Kategori</h4>
+<p>
+Kelola master kategori transaksi &amp; inventaris.
+</p>
+</a>
 </div>
 
 </div>
@@ -314,6 +461,8 @@ Grafik Keuangan
 RINGKASAN
 ============================== -->
 
+<div class="row">
+
 <div class="col-lg-6 mb-4">
 
 <div class="summary-card modern-card">
@@ -342,10 +491,8 @@ Jenis Aset
 
 </div>
 
-<div class="summary-icon bg-warning">
-
-🏢
-
+<div class="summary-icon bg-warning text-dark d-flex align-items-center justify-content-center fs-5">
+<i class="bi bi-box-seam"></i>
 </div>
 
 </div>
@@ -370,10 +517,8 @@ Jumlah Barang
 
 </div>
 
-<div class="summary-icon bg-success">
-
-📦
-
+<div class="summary-icon bg-success text-white d-flex align-items-center justify-content-center fs-5">
+<i class="bi bi-layers"></i>
 </div>
 
 </div>
@@ -398,9 +543,9 @@ Rp <%= Number(nilai_aset).toLocaleString("id-ID") %>
 
 </div>
 
-<div class="summary-icon bg-primary">
-
-💎
+<div class="summary-icon bg-primary text-white d-flex align-items-center justify-content-center fs-5">
+<i class="bi bi-cash-coin"></i>
+</div>
 
 </div>
 
@@ -640,6 +785,8 @@ AKTIVITAS TERBARU
 
 <div class="card-body p-0">
 
+<div class="table-responsive">
+
 <table class="table table-hover align-middle mb-0">
 
 <thead class="table-light">
@@ -731,6 +878,8 @@ Belum ada transaksi.
 </tbody>
 
 </table>
+
+</div>
 
 </div>
 
@@ -979,49 +1128,34 @@ SISTEM INFORMATION
 
                 <div class="col-lg-8">
 
-                    <h4 class="mb-3">
-
-                        🕌 Sistem Informasi DKM Crystal
-
+                    <h4 class="mb-3 d-flex align-items-center gap-2">
+                        <img src="/images/hero/logo-dkm-muhajirin.png" alt="Logo Masjid Ittihadul Muhajirin" class="dashboard-header-logo">
+                        <span>Sistem Informasi DKM Crystal</span>
                     </h4>
 
                     <p>
-
-                        Sistem ini dibuat untuk membantu pengurus DKM dalam
-                        mengelola:
-
+                        Sistem ini dibuat untuk membantu pengurus DKM dalam mengelola:
                     </p>
 
                     <ul>
-
                         <li>✔ Keuangan Masjid</li>
-
                         <li>✔ Inventaris Aset</li>
-
                         <li>✔ Donasi Barang</li>
-
                         <li>✔ Laporan PDF</li>
-
                         <li>✔ Laporan Excel</li>
-
                         <li>✔ Monitoring Saldo</li>
-
                     </ul>
 
                 </div>
 
-                <div class="col-lg-4 text-center">
+                <div class="col-lg-4 text-center d-flex flex-column align-items-center justify-content-center">
 
-                    <div class="display-1">
-
-                        🕌
-
+                    <div class="mb-2">
+                        <img src="/images/hero/logo-dkm-muhajirin.png" alt="Logo Masjid Ittihadul Muhajirin" style="width: 72px; height: 72px; object-fit: contain; border-radius: 14px; border: 1px solid #cbd5e1; background: #0f172a; padding: 4px;">
                     </div>
 
-                    <h5>
-
-                        DKM Crystal V2
-
+                    <h5 class="fw-bold mb-1">
+                        DKM Crystal
                     </h5>
 
                     <small class="text-muted">

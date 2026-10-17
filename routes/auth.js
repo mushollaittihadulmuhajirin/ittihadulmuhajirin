@@ -1,10 +1,21 @@
 const express = require("express");
 const router = express.Router();
-
 const authController = require("../controllers/authController");
+const passwordResetController = require("../controllers/passwordResetController");
 
-router.get("/ubah-password", authController.formUbahPassword);
+// =========================
+// Middleware Login
+// =========================
+function checkLogin(req, res, next) {
+    if (!req.session?.user) {
+        return res.redirect("/login");
+    }
 
-router.post("/ubah-password", authController.simpanPassword);
+    next();
+}
+
+router.get("/ubah-password", checkLogin, authController.formUbahPassword);
+router.post("/ubah-password", checkLogin, authController.simpanPassword);
+router.post("/kontak-pemulihan", checkLogin, passwordResetController.simpanKontakPemulihan);
 
 module.exports = router;

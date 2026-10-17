@@ -1,0 +1,371 @@
+<%- include("partials/header", { title: "Manajemen Master Blok — DKM Crystal" }) %>
+<%- include("partials/navbar") %>
+
+<div class="admin-page-header">
+    <div>
+        <h1 class="admin-page-title">
+            <i class="bi bi-grid-3x3-gap-fill text-success"></i> Manajemen Master Blok
+        </h1>
+        <div class="admin-page-subtitle">
+            <span>Kelola master data kode blok perumahan untuk formulir dan validasi masukan warga</span>
+        </div>
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+        <button type="button" class="btn btn-success btn-sm fw-semibold" data-bs-toggle="modal" data-bs-target="#modalTambahBlok">
+            <i class="bi bi-plus-circle"></i> Tambah Blok Baru
+        </button>
+        <a href="/saran" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-chat-heart"></i> Saran Warga
+        </a>
+        <a href="/dashboard" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-speedometer2"></i> Dashboard
+        </a>
+    </div>
+</div>
+
+<!-- NOTIFIKASI SUKSES / ERROR -->
+<% if (typeof successMsg !== 'undefined' && successMsg) { %>
+<div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+    <i class="bi bi-check-circle-fill me-2"></i> <%= successMsg %>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+<% } %>
+
+<% if (typeof errorMsg !== 'undefined' && errorMsg) { %>
+<div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+    <i class="bi bi-exclamation-triangle-fill me-2"></i> <%= errorMsg %>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+<% } %>
+
+<!-- RINGKASAN STATISTIK -->
+<div class="row g-3 mb-4">
+    <div class="col-12 col-md-4">
+        <div class="card shadow-sm border-0 rounded-4 p-3 mb-0 border-start border-primary border-4">
+            <div class="text-muted small fw-semibold text-uppercase">Total Master Blok</div>
+            <div class="fs-2 fw-bold text-dark my-1"><%= stats.totalSemua %></div>
+            <div class="text-secondary small">Seluruh blok tersimpan di database</div>
+        </div>
+    </div>
+    <div class="col-12 col-md-4">
+        <div class="card shadow-sm border-0 rounded-4 p-3 mb-0 border-start border-success border-4">
+            <div class="text-success small fw-semibold text-uppercase">Blok Status Aktif</div>
+            <div class="fs-2 fw-bold text-success my-1"><%= stats.totalAktif %></div>
+            <div class="text-muted small">Tampil di dropdown sugesti warga</div>
+        </div>
+    </div>
+    <div class="col-12 col-md-4">
+        <div class="card shadow-sm border-0 rounded-4 p-3 mb-0 border-start border-secondary border-4">
+            <div class="text-secondary small fw-semibold text-uppercase">Blok Nonaktif</div>
+            <div class="fs-2 fw-bold text-secondary my-1"><%= stats.totalNonaktif %></div>
+            <div class="text-muted small">Disembunyikan dari formulir publik</div>
+        </div>
+    </div>
+</div>
+
+<!-- FILTER & SEARCH BAR -->
+<div class="card shadow-sm border-0 rounded-4 mb-4">
+    <div class="card-body p-3">
+        <form method="GET" action="/master-blok" class="row g-2 align-items-center">
+            <div class="col-12 col-md-5">
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                    <input type="text" name="q" class="form-control border-start-0" placeholder="Cari kode blok (misal: A01, N01, 12)..." value="<%= filterQ %>">
+                </div>
+            </div>
+            <div class="col-12 col-md-4">
+                <select name="status" class="form-select">
+                    <option value="semua" <%= filterStatus === 'semua' ? 'selected' : '' %>>Semua Status Blok</option>
+                    <option value="aktif" <%= filterStatus === 'aktif' ? 'selected' : '' %>>Hanya Blok Aktif (<%= stats.totalAktif %>)</option>
+                    <option value="nonaktif" <%= filterStatus === 'nonaktif' ? 'selected' : '' %>>Hanya Blok Nonaktif (<%= stats.totalNonaktif %>)</option>
+                </select>
+            </div>
+            <div class="col-12 col-md-3 d-flex gap-2">
+                <button type="submit" class="btn btn-success flex-fill fw-semibold">
+                    <i class="bi bi-filter"></i> Saring
+                </button>
+                <a href="/master-blok" class="btn btn-outline-secondary" title="Reset filter">
+                    <i class="bi bi-arrow-counterclockwise"></i>
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- TABEL MASTER BLOK -->
+<div class="card shadow-sm border-0 rounded-4">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom" style="border-radius: 16px 16px 0 0;">
+        <h5 class="mb-0 fw-bold fs-6 text-dark"><i class="bi bi-table text-primary me-2"></i>Daftar Master Blok</h5>
+        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1">
+            Menampilkan <%= pagination.totalFiltered %> blok
+        </span>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr class="small text-muted text-uppercase">
+                    <th style="width: 50px;" class="text-center">No</th>
+                    <th style="width: 140px;">Kode Blok</th>
+                    <th style="width: 130px;" class="text-center">Status</th>
+                    <th style="width: 180px;" class="text-center">Riwayat Masukan</th>
+                    <th>Keterangan Sistem</th>
+                    <th style="width: 240px;" class="text-center">Aksi Pengelolaan</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (!listBlok || listBlok.length === 0) { %>
+                <tr>
+                    <td colspan="6" class="text-center py-5 text-muted">
+                        <i class="bi bi-inbox fs-2 d-block mb-2 text-secondary"></i>
+                        Tidak ditemukan master blok yang sesuai dengan kriteria pencarian.
+                    </td>
+                </tr>
+                <% } else { %>
+                    <% listBlok.forEach(function(item, idx) { %>
+                    <tr>
+                        <td class="text-center text-muted fw-semibold small">
+                            <%= ((pagination.currentPage - 1) * pagination.perPage) + idx + 1 %>
+                        </td>
+                        <td>
+                            <% if (item.aktif) { %>
+                                <span class="font-monospace fw-bold px-2 py-1 bg-dark text-white rounded"><%= item.kode_blok %></span>
+                            <% } else { %>
+                                <span class="font-monospace fw-bold px-2 py-1 bg-secondary text-white rounded text-decoration-line-through"><%= item.kode_blok %></span>
+                            <% } %>
+                        </td>
+                        <td class="text-center">
+                            <% if (item.aktif) { %>
+                                <span class="badge bg-success-subtle text-success border border-success-subtle"><i class="bi bi-check-circle-fill me-1"></i> Aktif</span>
+                            <% } else { %>
+                                <span class="badge bg-secondary"><i class="bi bi-slash-circle me-1"></i> Nonaktif</span>
+                            <% } %>
+                        </td>
+                        <td class="text-center">
+                            <% if (item.jumlah_masukan > 0) { %>
+                                <a href="/saran?blok=<%= encodeURIComponent(item.kode_blok) %>" class="badge bg-primary-subtle text-primary border border-primary-subtle text-decoration-none px-2 py-1" title="Lihat masukan dari blok ini">
+                                    <i class="bi bi-chat-dots-fill me-1"></i> <%= item.jumlah_masukan %> masukan
+                                </a>
+                            <% } else { %>
+                                <span class="text-muted small">0 masukan</span>
+                            <% } %>
+                        </td>
+                        <td>
+                            <small class="text-muted">
+                                Terdaftar: <%= item.created_at ? new Date(item.created_at).toLocaleDateString('id-ID') : '-' %>
+                            </small>
+                        </td>
+                        <td class="text-center">
+                            <div class="d-flex justify-content-center gap-1">
+                                <!-- Tombol Aktifkan / Nonaktifkan -->
+                                <form action="/master-blok/<%= item.id %>/toggle" method="POST" class="d-inline">
+                                    <% if (item.aktif) { %>
+                                        <button type="submit" class="btn btn-outline-secondary btn-sm" title="Nonaktifkan blok (sembunyikan dari formulir warga)">
+                                            <i class="bi bi-pause-circle"></i> Nonaktif
+                                        </button>
+                                    <% } else { %>
+                                        <button type="submit" class="btn btn-outline-success btn-sm" title="Aktifkan kembali blok">
+                                            <i class="bi bi-play-circle"></i> Aktifkan
+                                        </button>
+                                    <% } %>
+                                </form>
+
+                                <!-- Tombol Edit Kode Blok -->
+                                <button type="button" class="btn btn-outline-warning btn-sm" data-bs-toggle="modal" data-bs-target="#modalEditBlok<%= item.id %>" title="Edit Kode Blok">
+                                    <i class="bi bi-pencil-square"></i> Edit
+                                </button>
+
+                                <!-- Tombol Hapus -->
+                                <% if (item.jumlah_masukan > 0) { %>
+                                    <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#modalHapusProtected<%= item.id %>" title="Blok dilindungi karena memiliki riwayat masukan">
+                                        <i class="bi bi-shield-lock"></i> Hapus
+                                    </button>
+                                <% } else { %>
+                                    <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#modalHapusBlok<%= item.id %>" title="Hapus Blok Permanen">
+                                        <i class="bi bi-trash"></i> Hapus
+                                    </button>
+                                <% } %>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- MODAL EDIT BLOK -->
+                    <div class="modal fade" id="modalEditBlok<%= item.id %>" tabindex="-1" aria-labelledby="modalEditLabel<%= item.id %>" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content border-0 shadow-lg rounded-4">
+                                <form action="/master-blok/<%= item.id %>/edit" method="POST">
+                                    <div class="modal-header bg-dark text-white rounded-top-4">
+                                        <h5 class="modal-title fw-bold fs-6" id="modalEditLabel<%= item.id %>">
+                                            <i class="bi bi-pencil-square me-2 text-warning"></i> Edit Kode Blok
+                                        </h5>
+                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body p-4">
+                                        <div class="mb-3">
+                                            <label class="form-label small fw-semibold text-secondary">Kode Blok <span class="text-danger">*</span></label>
+                                            <input type="text" name="kode_blok" class="form-control font-monospace fw-bold text-uppercase" value="<%= item.kode_blok %>" required minlength="2" maxlength="10">
+                                            <div class="form-text small">Hanya huruf kapital dan angka (misal: A01, A12A, N01).</div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label small fw-semibold text-secondary">Status Ketersediaan</label>
+                                            <select name="aktif" class="form-select">
+                                                <option value="1" <%= item.aktif ? 'selected' : '' %>>Aktif (Tampil di formulir warga)</option>
+                                                <option value="0" <%= !item.aktif ? 'selected' : '' %>>Nonaktif (Sembunyikan dari formulir)</option>
+                                            </select>
+                                        </div>
+                                        <% if (item.jumlah_masukan > 0) { %>
+                                        <div class="alert alert-warning small mb-0 d-flex gap-2 align-items-center">
+                                            <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+                                            <div>
+                                                Blok ini telah digunakan pada <strong><%= item.jumlah_masukan %> data masukan warga</strong>. Jika Anda mengubah kode, data historis tetap tersambung secara otomatis melalui ID internal.
+                                            </div>
+                                        </div>
+                                        <% } %>
+                                    </div>
+                                    <div class="modal-footer bg-light rounded-bottom-4">
+                                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
+                                        <button type="submit" class="btn btn-primary btn-sm px-3 fw-semibold">Simpan Perubahan</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- MODAL HAPUS PERMANEN -->
+                    <% if (item.jumlah_masukan === 0) { %>
+                    <div class="modal fade" id="modalHapusBlok<%= item.id %>" tabindex="-1" aria-labelledby="modalHapusLabel<%= item.id %>" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content border-0 shadow-lg rounded-4">
+                                <form action="/master-blok/<%= item.id %>/hapus" method="POST">
+                                    <div class="modal-header bg-danger text-white rounded-top-4">
+                                        <h5 class="modal-title fw-bold fs-6" id="modalHapusLabel<%= item.id %>">
+                                            <i class="bi bi-trash me-2"></i> Konfirmasi Hapus Blok
+                                        </h5>
+                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body p-4 text-center">
+                                        <i class="bi bi-exclamation-circle text-danger display-4 d-block mb-3"></i>
+                                        <p class="mb-2">Apakah Anda yakin ingin menghapus master blok <strong><%= item.kode_blok %></strong> secara permanen?</p>
+                                        <p class="small text-muted mb-0">Blok ini belum pernah digunakan pada data masukan warga dan aman untuk dihapus.</p>
+                                    </div>
+                                    <div class="modal-footer bg-light justify-content-between rounded-bottom-4">
+                                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
+                                        <button type="submit" class="btn btn-danger btn-sm px-3 fw-semibold">Ya, Hapus Permanen</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <% } else { %>
+                    <!-- MODAL PERINGATAN BLOK TERLINDUNGI -->
+                    <div class="modal fade" id="modalHapusProtected<%= item.id %>" tabindex="-1" aria-labelledby="modalProtectedLabel<%= item.id %>" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content border-0 shadow-lg rounded-4">
+                                <div class="modal-header bg-warning text-dark rounded-top-4">
+                                    <h5 class="modal-title fw-bold fs-6" id="modalProtectedLabel<%= item.id %>">
+                                        <i class="bi bi-shield-exclamation me-2"></i> Blok Terlindungi
+                                    </h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body p-4">
+                                    <div class="text-center mb-3">
+                                        <i class="bi bi-shield-lock text-warning display-4 d-block mb-2"></i>
+                                        <h6 class="fw-bold text-dark">Penghapusan Ditolak Demi Integritas Data</h6>
+                                    </div>
+                                    <p class="small text-muted mb-3">
+                                        Kode blok <strong><%= item.kode_blok %></strong> tidak dapat dihapus karena telah terdaftar pada <strong><%= item.jumlah_masukan %> riwayat masukan warga</strong>. Menghapus blok ini akan merusak data historis aspirasi warga.
+                                    </p>
+                                    <div class="alert alert-info small mb-0">
+                                        <strong>Saran Tindakan:</strong> Gunakan tombol <strong>Nonaktifkan</strong>. Blok yang dinonaktifkan tidak akan muncul lagi pada formulir warga, namun seluruh riwayat masukan lama tetap aman tersimpan.
+                                    </div>
+                                </div>
+                                <div class="modal-footer bg-light justify-content-between rounded-bottom-4">
+                                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Tutup</button>
+                                    <% if (item.aktif) { %>
+                                    <form action="/master-blok/<%= item.id %>/toggle" method="POST" class="d-inline">
+                                        <button type="submit" class="btn btn-warning btn-sm fw-semibold">
+                                            <i class="bi bi-pause-circle me-1"></i> Nonaktifkan Blok Saja
+                                        </button>
+                                    </form>
+                                    <% } %>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <% } %>
+
+                    <% }); %>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- PAGINATION -->
+    <% if (pagination.totalPages > 1) { %>
+    <div class="card-footer bg-white d-flex justify-content-between align-items-center py-3 border-top" style="border-radius: 0 0 16px 16px;">
+        <div class="small text-muted">
+            Menampilkan <%= ((pagination.currentPage - 1) * pagination.perPage) + 1 %>–<%= Math.min(pagination.currentPage * pagination.perPage, pagination.totalFiltered) %> dari <%= pagination.totalFiltered %> blok
+        </div>
+        <ul class="pagination pagination-sm mb-0">
+            <li class="page-item <%= pagination.currentPage === 1 ? 'disabled' : '' %>">
+                <a class="page-link" href="/master-blok?page=<%= pagination.currentPage - 1 %>&q=<%= filterQ %>&status=<%= filterStatus %>" aria-label="Previous">
+                    &laquo;
+                </a>
+            </li>
+            <% for (let p = 1; p <= pagination.totalPages; p++) { %>
+                <% if (p === 1 || p === pagination.totalPages || (p >= pagination.currentPage - 2 && p <= pagination.currentPage + 2)) { %>
+                    <li class="page-item <%= pagination.currentPage === p ? 'active' : '' %>">
+                        <a class="page-link" href="/master-blok?page=<%= p %>&q=<%= filterQ %>&status=<%= filterStatus %>"><%= p %></a>
+                    </li>
+                <% } else if (p === pagination.currentPage - 3 || p === pagination.currentPage + 3) { %>
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                <% } %>
+            <% } %>
+            <li class="page-item <%= pagination.currentPage === pagination.totalPages ? 'disabled' : '' %>">
+                <a class="page-link" href="/master-blok?page=<%= pagination.currentPage + 1 %>&q=<%= filterQ %>&status=<%= filterStatus %>" aria-label="Next">
+                    &raquo;
+                </a>
+            </li>
+        </ul>
+    </div>
+    <% } %>
+</div>
+
+<!-- MODAL TAMBAH BLOK BARU -->
+<div class="modal fade" id="modalTambahBlok" tabindex="-1" aria-labelledby="modalTambahLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <form action="/master-blok/tambah" method="POST">
+                <div class="modal-header bg-success text-white rounded-top-4">
+                    <h5 class="modal-title fw-bold fs-6" id="modalTambahLabel">
+                        <i class="bi bi-plus-circle me-2"></i> Tambah Master Blok Baru
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label for="inputTambahKode" class="form-label small fw-semibold text-secondary">
+                            Kode Blok <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" name="kode_blok" id="inputTambahKode" class="form-control font-monospace fw-bold text-uppercase" placeholder="Contoh: A19, N01, K12C" required minlength="2" maxlength="10">
+                        <div class="form-text small">Kode otomatis dikonversi ke huruf kapital. Format: huruf dan angka (misal: <code>N01</code>, <code>A12A</code>).</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="selectTambahAktif" class="form-label small fw-semibold text-secondary">Status Awal</label>
+                        <select name="aktif" id="selectTambahAktif" class="form-select">
+                            <option value="1" selected>Aktif (Langsung muncul di autocomplete warga)</option>
+                            <option value="0">Nonaktif (Disimpan tanpa ditampilkan ke warga)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light rounded-bottom-4">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-success btn-sm px-4 fw-semibold">
+                        <i class="bi bi-save2 me-1"></i> Simpan Blok Baru
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<%- include("partials/footer") %>

@@ -24,6 +24,10 @@ const donasiBarangRoute = require("./routes/donasiBarang");
 const authRoute = require("./routes/auth");
 const backupRoute = require("./routes/backup");
 const restoreRoute = require("./routes/restore");
+const pengaturanDonasiRoute = require("./routes/pengaturanDonasi");
+const saranRoute = require("./routes/saran");
+const masterBlokRoute = require("./routes/masterBlok");
+const passwordResetRoute = require("./routes/passwordReset");
 
 
 // =========================
@@ -58,6 +62,7 @@ app.use(express.static(path.join(__dirname, "public")));
 // =========================
 app.use("/", homeRoute);
 app.use("/login", loginRoute);
+app.get("/logout", (req, res) => res.redirect("/login/logout"));
 app.use("/dashboard", dashboardRoute);
 app.use("/laporan", laporanRoute);
 app.use("/transaksi", transaksiRoute);
@@ -66,8 +71,14 @@ app.use("/kategori", kategoriRoute);
 app.use("/aset", asetRoute);
 app.use("/donasi-barang", donasiBarangRoute);
 app.use("/auth", authRoute);
+app.use("/", passwordResetRoute);
 app.use("/backup", backupRoute);
 app.use("/restore", restoreRoute);
+app.use("/pengaturan-donasi", pengaturanDonasiRoute);
+app.use("/saran", saranRoute.router);
+app.use("/master-blok", masterBlokRoute);
+app.get("/api/master-blok", saranRoute.apiMasterBlok);
+app.post("/api/saran", saranRoute.apiSimpanSaran);
 
 
 // =========================

@@ -1,90 +1,90 @@
 const express = require("express");
 const router = express.Router();
 const db = require("../config/db");
+const saldoService = require("../services/saldoService");
 
-router.get("/", (req, res) => {
-
-    if (!req.session.user) {
+/* ======================================================
+   MIDDLEWARE LOGIN
+====================================================== */
+function checkLogin(req, res, next) {
+    if (!req.session || !req.session.user) {
         return res.redirect("/login");
     }
+    next();
+}
 
-    // Ringkasan Keuangan
-    db.query(`
-        SELECT
-        COALESCE(
-            SUM(CASE WHEN jenis='masuk' THEN nominal ELSE 0 END),
-            0
-        ) AS pemasukan,
+/* ======================================================
+   DASHBOARD UTAMA ADMIN
+====================================================== */
+router.get("/", checkLogin, async (req, res) => {
+    try {
+        // 1. Ringkasan Keuangan via saldoService (Official Cut-Off + Pasca Cut-Off)
+        const ringkasanSaldo = await saldoService.getRingkasanSaldo(db);
 
-        COALESCE(
-            SUM(CASE WHEN jenis='keluar' THEN nominal ELSE 0 END),
-            0
-        ) AS pengeluaran
-
-    FROM transaksi
-    `, (err, hasil) => {
-
-        if (err) {
-            console.log(err);
-            return res.status(500).send("Terjadi kesalahan saat memuat dashboard");
-        }
-
-        const pemasukan = Number(hasil[0].pemasukan || 0);
-        const pengeluaran = Number(hasil[0].pengeluaran || 0);
-        const saldo = pemasukan - pengeluaran;
-
-        // Ringkasan Inventaris
-        db.query(`
+        // 2. Ringkasan Inventaris
+        const sqlAset = `
             SELECT
-            COUNT(*) AS total_aset,
-COALESCE(SUM(jumlah),0) AS total_barang,
-COALESCE(SUM(nilai_estimasi),0) AS nilai_aset
-FROM aset
-        `, (err2, aset) => {
+                COUNT(*) AS total_aset,
+                COALESCE(SUM(jumlah), 0) AS total_barang,
+                COALESCE(SUM(nilai_estimasi), 0) AS nilai_aset
+            FROM aset
+        `;
 
-            if (err2) {
-                console.log(err2);
-    return res.status(500).send("Gagal mengambil data inventaris");
-            }
+        db.query(sqlAset, (errAset, asetRows) => {
+            const aset = asetRows?.[0] || { total_aset: 0, total_barang: 0, nilai_aset: 0 };
 
-            // Ambil transaksi terakhir
-            db.query(`
+            // 3. Ringkasan Donasi Barang
+            const sqlDonasi = `
                 SELECT
-                transaksi.*,
-                kategori.nama AS kategori_nama
-                FROM transaksi
-                LEFT JOIN kategori
-                ON transaksi.kategori_id = kategori.id
-                ORDER BY transaksi.tanggal DESC,
-                transaksi.id DESC
-                LIMIT 10
-            `, (err3, aktivitas) => {
+                    COUNT(*) AS total_donasi,
+                    COALESCE(SUM(estimasi_harga), 0) AS total_nilai_donasi
+                FROM donasi_barang
+            `;
 
-                if (err3) {
-                    console.log(err3);
-                    aktivitas = [];
-                }
+            db.query(sqlDonasi, (errDonasi, donasiRows) => {
+                const donasi = donasiRows?.[0] || { total_donasi: 0, total_nilai_donasi: 0 };
 
-                res.render("dashboard", {
+                // 4. Aktivitas Transaksi Terbaru (10 Transaksi Terakhir)
+                const sqlAktivitas = `
+                    SELECT
+                        transaksi.*,
+                        kategori.nama AS kategori_nama
+                    FROM transaksi
+                    LEFT JOIN kategori ON transaksi.kategori_id = kategori.id
+                    ORDER BY transaksi.tanggal DESC, transaksi.id DESC
+                    LIMIT 10
+                `;
 
-                    pemasukan,
-                    pengeluaran,
-                    saldo,
+                db.query(sqlAktivitas, (errAktivitas, aktivitasRows) => {
+                    res.render("dashboard", {
+                        // 5 Kartu Keuangan Resmi
+                        pemasukan: ringkasanSaldo.totalMasuk,
+                        pengeluaran: ringkasanSaldo.totalKeluar,
+                        saldo: ringkasanSaldo.saldoTotal,
+                        saldoTotal: ringkasanSaldo.saldoTotal,
+                        saldoTunai: ringkasanSaldo.saldoTunai,
+                        saldoNonTunai: ringkasanSaldo.saldoNonTunai,
+                        tanggalCutoff: ringkasanSaldo.tanggalCutoff,
 
-                    total_aset: aset?.[0]?.total_aset || 0,
-                    total_barang: aset?.[0]?.total_barang || 0,
-                    nilai_aset: aset?.[0]?.nilai_aset || 0,
+                        // Ringkasan Inventaris
+                        total_aset: aset.total_aset || 0,
+                        total_barang: aset.total_barang || 0,
+                        nilai_aset: aset.nilai_aset || 0,
 
-                    aktivitas
+                        // Ringkasan Donasi Barang
+                        total_donasi: donasi.total_donasi || 0,
+                        total_nilai_donasi: donasi.total_nilai_donasi || 0,
 
+                        // Aktivitas
+                        aktivitas: aktivitasRows || []
+                    });
                 });
-
             });
-
         });
-
-    });
-
+    } catch (err) {
+        console.error("Gagal memuat dashboard:", err);
+        res.status(500).send("Terjadi kesalahan saat memuat dashboard");
+    }
 });
 
 module.exports = router;

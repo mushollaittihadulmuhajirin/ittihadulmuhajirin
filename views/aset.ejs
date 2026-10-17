@@ -1,172 +1,648 @@
-<!DOCTYPE html>
-
-<html> <head> <title>Inventaris Aset Masjid</title>
-
-<meta name="viewport" content="width=device-width, initial-scale=1">
-
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+<%- include("partials/header", { title: "Inventaris Aset Masjid" }) %>
+<%- include("partials/navbar") %>
 
 <style>
-    body{
-        background:#f5f6fa;
-    }
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
 
-    .card{
-        border:none;
-        border-radius:15px;
-        box-shadow:0 2px 10px rgba(0,0,0,.08);
-    }
+.dashboard-title {
+    font-weight: 700;
+    margin-bottom: 2px;
+}
 
-    h2{
-        font-weight:bold;
-    }
+.shadow-soft {
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 4px 18px rgba(0,0,0,.06);
+}
 
-    .table{
-        white-space: nowrap;
+.table td, .table th {
+    vertical-align: middle;
+}
+
+.badge {
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* 3 INVENTORY STAT CARDS */
+.stat-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+}
+@media (max-width: 768px) {
+    .stat-grid {
+        grid-template-columns: 1fr;
     }
+}
+.stat-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 18px 16px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px -2px rgba(0, 0, 0, 0.08);
+}
+.stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    flex-shrink: 0;
+}
+.icon-aset-jenis { background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; }
+.icon-aset-unit { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+.icon-aset-nilai { background: #fefce8; color: #ca8a04; border: 1px solid #fef08a; }
+
+.stat-info { min-width: 0; flex-grow: 1; }
+.stat-title {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #64748b;
+    margin-bottom: 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+.stat-val {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.35rem;
+    font-weight: 700;
+    margin: 0;
+    color: #0f172a;
+    line-height: 1.25;
+}
+.stat-subtext {
+    font-size: 0.72rem;
+    color: #94a3b8;
+    margin: 3px 0 0 0;
+}
+
+/* FILTER & PAGINATION */
+.table-filter-bar {
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 12px 16px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+}
+.table-filter-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.table-pagination-footer {
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+    padding: 10px 16px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+.btn-page-step {
+    border: 1px solid #cbd5e1;
+    background: #ffffff;
+    color: #334155;
+    border-radius: 8px;
+    padding: 4px 10px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+.btn-page-step:hover:not(:disabled) {
+    background: #e2e8f0;
+}
+.btn-page-step:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+.btn-page-step.active {
+    background: #059669;
+    color: #ffffff;
+    border-color: #059669;
+    font-weight: 700;
+}
+.page-size-select {
+    padding: 4px 8px;
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+    font-size: 0.82rem;
+    background-color: #ffffff;
+}
+.pagination-info {
+    font-size: 0.82rem;
+    color: #64748b;
+    font-weight: 500;
+}
 </style>
 
-</head> <body>
+<div class="container-fluid">
 
-<div class="container py-3">
+<div class="page-header">
+    <div>
+        <h2 class="dashboard-title">
+            📦 Inventaris &amp; Aset Masjid
+        </h2>
+        <small class="text-muted">
+            Manajemen sarana prasarana, fasilitas ibadah, dan aset fisik DKM
+        </small>
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+        <a href="/transaksi" class="btn btn-outline-success btn-sm">
+            <i class="bi bi-cash-stack"></i> Ke Transaksi
+        </a>
+        <a href="/dashboard" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-speedometer2"></i> Dashboard
+        </a>
+    </div>
+</div>
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h2>📦 Inventaris Aset Masjid</h2>
+<!-- ===================================================== -->
+<!-- 3 KARTU RINGKASAN INVENTARIS -->
+<!-- ===================================================== -->
+<section class="stat-grid" aria-label="Statistik Inventaris">
+    <!-- Stat 1: Total Jenis Aset -->
+    <div class="stat-card">
+        <div class="stat-icon icon-aset-jenis">
+            <i class="bi bi-box-seam"></i>
+        </div>
+        <div class="stat-info">
+            <div class="stat-title">Total Jenis Aset</div>
+            <div class="stat-val"><%= Number(total_aset || 0) %> Jenis</div>
+            <div class="stat-subtext">Item aset tercatat</div>
+        </div>
+    </div>
 
-    <a href="/dashboard" class="btn btn-secondary">
-        Kembali
+    <!-- Stat 2: Total Unit Barang -->
+    <div class="stat-card">
+        <div class="stat-icon icon-aset-unit">
+            <i class="bi bi-layers-fill"></i>
+        </div>
+        <div class="stat-info">
+            <div class="stat-title">Total Unit Barang</div>
+            <div class="stat-val"><%= Number(total_barang || 0).toLocaleString("id-ID") %> Unit</div>
+            <div class="stat-subtext">Akumulasi kuantitas fisik</div>
+        </div>
+    </div>
+
+    <!-- Stat 3: Estimasi Nilai Aset -->
+    <div class="stat-card">
+        <div class="stat-icon icon-aset-nilai">
+            <i class="bi bi-cash-coin"></i>
+        </div>
+        <div class="stat-info">
+            <div class="stat-title">Estimasi Nilai Aset</div>
+            <div class="stat-val text-warning text-dark">
+                Rp <%= Number(nilai_aset || 0).toLocaleString("id-ID") %>
+            </div>
+            <div class="stat-subtext">Perkiraan nilai materiil</div>
+        </div>
+    </div>
+</section>
+
+<!-- ===================================================== -->
+<!-- FORM TAMBAH ASET & PUSAT INPUT NOTICE -->
+<!-- ===================================================== -->
+<div class="alert alert-success d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4 shadow-sm border-0" style="border-radius: 12px; background-color: #ecfdf5; border-left: 5px solid #059669 !important;">
+    <div class="d-flex align-items-center gap-3">
+        <div style="font-size: 1.5rem;">💡</div>
+        <div>
+            <strong class="text-success">Pusat Input Terpadu DKM:</strong>
+            <div class="small text-muted">Seluruh pencatatan kas, donasi barang, dan inventaris dipusatkan pada formulir transaksi terpadu.</div>
+        </div>
+    </div>
+    <a href="/transaksi?jenis=inventaris" class="btn btn-success btn-sm fw-semibold">
+        💰 Input Inventaris di /transaksi &rarr;
     </a>
 </div>
 
-<div class="card p-3 mb-4">
-
-    <h5 class="mb-3">Tambah Aset</h5>
-
-    <form action="/aset/tambah" method="POST">
-
-        <div class="row g-2">
-
-            <div class="col-12 col-md-6">
-                <input
-                    class="form-control"
-                    name="nama_aset"
-                    placeholder="Nama Aset"
-                    required>
-            </div>
-
-            <div class="col-6 col-md-3">
-                <input
-                    class="form-control"
-                    name="kategori"
-                    placeholder="Kategori">
-            </div>
-
-            <div class="col-6 col-md-3">
-                <input
-                    type="number"
-                    class="form-control"
-                    name="jumlah"
-                    placeholder="Jumlah">
-            </div>
-
-            <div class="col-6 col-md-3">
-                <input
-                    class="form-control"
-                    name="kondisi"
-                    placeholder="Kondisi">
-            </div>
-
-            <div class="col-6 col-md-3">
-                <input
-                    class="form-control"
-                    name="sumber"
-                    placeholder="Sumber">
-            </div>
-
-            <div class="col-12 col-md-3">
-                <input
-                    type="date"
-                    class="form-control"
-                    name="tanggal_masuk">
-            </div>
-
-            <div class="col-12 col-md-3">
-                <input
-                    type="number"
-                    class="form-control"
-                    name="nilai_estimasi"
-                    placeholder="Nilai Estimasi">
-            </div>
-
-            <div class="col-12">
-                <textarea
-                    class="form-control"
-                    rows="2"
-                    name="keterangan"
-                    placeholder="Keterangan"></textarea>
-            </div>
-
-            <div class="col-12">
-                <button class="btn btn-success">
-                    Simpan Aset
-                </button>
-            </div>
-
-        </div>
-
-    </form>
-
-</div>
-
-<div class="card p-3">
-
-    <h5 class="mb-3">Daftar Aset</h5>
-
-    <div class="table-responsive">
-
-        <table class="table table-bordered table-striped">
-
-            <thead class="table-success">
-                <tr>
-                    <th>Nama</th>
-                    <th>Kategori</th>
-                    <th>Jumlah</th>
-                    <th>Kondisi</th>
-                    <th>Sumber</th>
-                    <th>Tanggal</th>
-                    <th>Nilai</th>
-                    <th>Keterangan</th>
-                </tr>
-            </thead>
-
-            <tbody>
-
-            <% data.forEach(item => { %>
-
-                <tr>
-                    <td><%= item.nama_aset %></td>
-                    <td><%= item.kategori %></td>
-                    <td><%= item.jumlah %></td>
-                    <td><%= item.kondisi %></td>
-                    <td><%= item.sumber %></td>
-                    <td><%= item.tanggal_masuk ? new Date(item.tanggal_masuk).toLocaleDateString('id-ID') : '' %></td>
-                    <td>
-                        Rp
-                        <%= Number(item.nilai_estimasi || 0).toLocaleString('id-ID') %>
-                    </td>
-                    <td><%= item.keterangan %></td>
-                </tr>
-
-            <% }) %>
-
-            </tbody>
-
-        </table>
-
+<div class="card shadow-soft mb-4">
+    <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 fw-bold text-success">
+            ➕ Formulir Inventaris Mandiri (Opsional)
+        </h5>
+        <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFormAset">
+            Buka / Tutup Form
+        </button>
     </div>
 
+    <div class="collapse" id="collapseFormAset">
+        <div class="card-body">
+            <form action="/aset/simpan" method="POST">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label small fw-semibold">📅 Tanggal Masuk</label>
+                        <input type="date" class="form-control" id="tanggal_masuk" name="tanggal_masuk" required>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label small fw-semibold">📦 Nama Aset / Barang</label>
+                        <input type="text" class="form-control" name="nama_aset" placeholder="Contoh: AC Daikin 2 PK, Mimbar Jati..." required>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label small fw-semibold">📂 Kategori</label>
+                        <select class="form-select" name="kategori">
+                            <option value="">-- Pilih Kategori --</option>
+                            <% if (typeof kategori !== 'undefined' && kategori.length) { %>
+                                <% kategori.forEach(function(k){ %>
+                                    <option value="<%= k.nama %>"><%= k.nama %></option>
+                                <% }) %>
+                            <% } %>
+                            <option value="Elektronik">Elektronik</option>
+                            <option value="Furnitur">Furnitur</option>
+                            <option value="Alat Sholat">Alat Sholat</option>
+                            <option value="Kebersihan">Kebersihan</option>
+                            <option value="Lainnya">Lainnya</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label small fw-semibold">🔢 Jumlah</label>
+                        <input type="number" class="form-control" name="jumlah" value="1" min="1" required>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label small fw-semibold">📏 Satuan</label>
+                        <input type="text" class="form-control" name="satuan" value="Unit" placeholder="Unit, Pcs, Buah">
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label small fw-semibold">🏷 Kondisi</label>
+                        <select class="form-select" name="kondisi">
+                            <option value="Baru">Baru</option>
+                            <option value="Baik" selected>Baik</option>
+                            <option value="Bekas">Bekas</option>
+                            <option value="Service">Perlu Service</option>
+                            <option value="Rusak">Rusak</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label small fw-semibold">📍 Lokasi Penempatan</label>
+                        <input type="text" class="form-control" name="lokasi" placeholder="Contoh: Ruang Utama, Gudang...">
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label small fw-semibold">💰 Estimasi Nilai (Rp)</label>
+                        <input type="number" class="form-control" name="nilai_estimasi" value="0" min="0">
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label small fw-semibold">📝 Keterangan / Sumber Perolehan</label>
+                        <input type="text" class="form-control" name="keterangan" placeholder="Contoh: Hibah donatur blok B05, Pembelian kas...">
+                    </div>
+
+                    <div class="col-12 text-end pt-2">
+                        <button type="reset" class="btn btn-secondary me-2">
+                            Reset
+                        </button>
+                        <button type="submit" class="btn btn-success fw-semibold">
+                            💾 Simpan Aset
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 
+<!-- ===================================================== -->
+<!-- TABEL DAFTAR ASET -->
+<!-- ===================================================== -->
+<div class="card shadow-soft mb-5">
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">
+            📦 Daftar Inventaris Aset Masjid
+        </h5>
+        <span class="badge bg-light text-dark fw-bold">
+            <%= (data && data.length) ? data.length : 0 %> Item
+        </span>
+    </div>
+
+    <!-- Filter Bar Aset -->
+    <div class="table-filter-bar">
+        <div class="input-group input-group-sm" style="max-width: 250px;">
+            <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+            <input type="text" id="searchAset" class="form-control" placeholder="Cari nama aset, lokasi...">
+        </div>
+
+        <div class="table-filter-item">
+            <span class="small text-muted">Kondisi:</span>
+            <select id="filterKondisiAset" class="form-select form-select-sm" style="width: auto;">
+                <option value="semua">Semua Kondisi</option>
+                <option value="baru">Baru</option>
+                <option value="baik">Baik</option>
+                <option value="bekas">Bekas</option>
+                <option value="service">Service</option>
+                <option value="rusak">Rusak</option>
+            </select>
+        </div>
+
+        <div class="table-filter-item">
+            <span class="small text-muted">Dari:</span>
+            <input type="date" id="filterMulaiAset" class="form-control form-control-sm" style="width: auto;">
+        </div>
+
+        <div class="table-filter-item">
+            <span class="small text-muted">Sampai:</span>
+            <input type="date" id="filterSampaiAset" class="form-control form-control-sm" style="width: auto;">
+        </div>
+
+        <button type="button" id="btnResetAset" class="btn btn-outline-secondary btn-sm ms-auto">
+            <i class="bi bi-arrow-counterclockwise"></i> Reset
+        </button>
+    </div>
+
+    <div class="card-body p-0 table-responsive">
+        <table class="table table-bordered table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th width="45" class="text-center">No</th>
+                    <th>📅 Tanggal Masuk</th>
+                    <th>📦 Nama Aset</th>
+                    <th>📂 Kategori</th>
+                    <th>🔢 Jumlah</th>
+                    <th>🏷 Kondisi</th>
+                    <th>📍 Lokasi</th>
+                    <th class="text-end">💰 Nilai Estimasi</th>
+                    <th>📝 Keterangan</th>
+                    <th width="150" class="text-center">⚡ Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="tbodyAset">
+            <% if(data && data.length){ %>
+                <% data.forEach(function(item, index){ %>
+                <tr data-tanggal="<%= item.tanggal_masuk ? new Date(item.tanggal_masuk).toISOString().slice(0,10) : '' %>"
+                    data-kondisi="<%= (item.kondisi || '').toLowerCase().trim() %>">
+                    <td class="text-center text-muted">
+                        <%= index + 1 %>
+                    </td>
+                    <td>
+                        <%= item.tanggal_masuk ? new Date(item.tanggal_masuk).toLocaleDateString("id-ID") : "-" %>
+                    </td>
+                    <td>
+                        <strong><%= item.nama_aset %></strong>
+                    </td>
+                    <td>
+                        <%= item.kategori || "-" %>
+                    </td>
+                    <td>
+                        <%= item.jumlah %> <%= item.satuan || "Unit" %>
+                    </td>
+                    <td>
+                        <% const k = (item.kondisi || "").toLowerCase(); %>
+                        <% if (k === "baru" || k === "baik") { %>
+                            <span class="badge bg-success"><%= item.kondisi %></span>
+                        <% } else if (k === "bekas") { %>
+                            <span class="badge bg-warning text-dark">Bekas</span>
+                        <% } else if (k === "service" || k === "rusak") { %>
+                            <span class="badge bg-danger"><%= item.kondisi %></span>
+                        <% } else { %>
+                            <span class="badge bg-secondary"><%= item.kondisi || "-" %></span>
+                        <% } %>
+                    </td>
+                    <td>
+                        <%= item.lokasi || "-" %>
+                    </td>
+                    <td class="text-end fw-semibold">
+                        Rp <%= Number(item.nilai_estimasi || 0).toLocaleString("id-ID") %>
+                    </td>
+                    <td>
+                        <%= item.keterangan || "-" %>
+                    </td>
+                    <td class="text-center">
+                        <div class="btn-group btn-group-sm">
+                            <a href="/aset/edit/<%= item.id %>" class="btn btn-warning btn-sm" title="Edit Aset">
+                                ✏ Edit
+                            </a>
+                            <a href="/aset/hapus/<%= item.id %>" class="btn btn-danger btn-sm" title="Hapus Aset" onclick="return confirm('Hapus aset ini?')">
+                                🗑 Hapus
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                <% }) %>
+            <% } else { %>
+                <tr>
+                    <td colspan="10" class="text-center text-muted py-4">
+                        Belum ada data inventaris aset tercatat.
+                    </td>
+                </tr>
+            <% } %>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination Footer Aset -->
+    <div class="table-pagination-footer">
+        <div class="d-flex align-items-center gap-2">
+            <span class="pagination-info" id="infoAset">Menampilkan 0 data</span>
+            <div class="d-flex align-items-center gap-1 ms-2">
+                <span class="small text-muted">Baris:</span>
+                <select id="pageSizeAset" class="page-size-select">
+                    <option value="10" selected>10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="all">Semua</option>
+                </select>
+            </div>
+        </div>
+        <div class="d-flex align-items-center gap-1" id="navAset"></div>
+    </div>
 </div>
 
-</body> </html>
+</div><!-- end container-fluid -->
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // Auto tanggal hari ini
+    const elTanggal = document.getElementById("tanggal_masuk");
+    if (elTanggal && !elTanggal.value) {
+        elTanggal.value = new Date().toISOString().split("T")[0];
+    }
+
+    // Universal Table Paginator for Aset Table
+    class AdminTablePaginator {
+        constructor(config) {
+            this.tbody = document.getElementById(config.tbodyId);
+            this.infoEl = document.getElementById(config.infoId);
+            this.navEl = document.getElementById(config.navId);
+            this.pageSizeSelect = document.getElementById(config.pageSizeId);
+            this.searchInput = document.getElementById(config.searchId);
+            this.filterMulai = document.getElementById(config.mulaiId);
+            this.filterSampai = document.getElementById(config.sampaiId);
+            this.filterKondisi = config.kondisiId ? document.getElementById(config.kondisiId) : null;
+            this.btnReset = document.getElementById(config.resetId);
+
+            if (!this.tbody) return;
+            this.allRows = Array.from(this.tbody.querySelectorAll("tr"));
+            this.currentPage = 1;
+            this.pageSize = 10;
+
+            this.init();
+        }
+
+        init() {
+            if (this.pageSizeSelect) {
+                this.pageSizeSelect.addEventListener("change", (e) => {
+                    const v = e.target.value;
+                    this.pageSize = (v === "all") ? 999999 : parseInt(v);
+                    this.currentPage = 1;
+                    this.render();
+                });
+            }
+
+            const triggerFilter = () => {
+                this.currentPage = 1;
+                this.render();
+            };
+
+            if (this.searchInput) this.searchInput.addEventListener("input", triggerFilter);
+            if (this.filterMulai) this.filterMulai.addEventListener("change", triggerFilter);
+            if (this.filterSampai) this.filterSampai.addEventListener("change", triggerFilter);
+            if (this.filterKondisi) this.filterKondisi.addEventListener("change", triggerFilter);
+
+            if (this.btnReset) {
+                this.btnReset.addEventListener("click", () => {
+                    if (this.searchInput) this.searchInput.value = "";
+                    if (this.filterMulai) this.filterMulai.value = "";
+                    if (this.filterSampai) this.filterSampai.value = "";
+                    if (this.filterKondisi) this.filterKondisi.value = "semua";
+                    this.currentPage = 1;
+                    this.render();
+                });
+            }
+
+            this.render();
+        }
+
+        getFilteredRows() {
+            const query = (this.searchInput ? this.searchInput.value : "").toLowerCase().trim();
+            const mulai = this.filterMulai ? this.filterMulai.value : "";
+            const sampai = this.filterSampai ? this.filterSampai.value : "";
+            const kondisi = this.filterKondisi ? this.filterKondisi.value : "semua";
+
+            return this.allRows.filter(row => {
+                if (row.cells.length <= 1) return false;
+
+                if (query && !row.textContent.toLowerCase().includes(query)) {
+                    return false;
+                }
+
+                const rowTanggal = row.dataset.tanggal || "";
+                if (mulai && rowTanggal && rowTanggal < mulai) return false;
+                if (sampai && rowTanggal && rowTanggal > sampai) return false;
+
+                if (kondisi !== "semua" && (row.dataset.kondisi || "") !== kondisi) {
+                    return false;
+                }
+
+                return true;
+            });
+        }
+
+        goToPage(page) {
+            this.currentPage = page;
+            this.render();
+        }
+
+        render() {
+            const activeRows = this.getFilteredRows();
+            const total = activeRows.length;
+            const totalPages = Math.max(1, Math.ceil(total / this.pageSize));
+
+            if (this.currentPage > totalPages) this.currentPage = totalPages;
+            if (this.currentPage < 1) this.currentPage = 1;
+
+            const startIdx = (this.currentPage - 1) * this.pageSize;
+            const endIdx = startIdx + this.pageSize;
+
+            this.allRows.forEach(r => r.style.display = "none");
+            activeRows.slice(startIdx, endIdx).forEach(r => r.style.display = "");
+
+            if (this.infoEl) {
+                if (total === 0) {
+                    this.infoEl.textContent = "Menampilkan 0 data";
+                } else {
+                    const displayStart = startIdx + 1;
+                    const displayEnd = Math.min(endIdx, total);
+                    this.infoEl.textContent = `Menampilkan ${displayStart}–${displayEnd} dari ${total} data`;
+                }
+            }
+
+            if (this.navEl) {
+                this.navEl.innerHTML = "";
+                if (totalPages > 1) {
+                    const prevBtn = document.createElement("button");
+                    prevBtn.type = "button";
+                    prevBtn.className = "btn-page-step";
+                    prevBtn.innerHTML = "<i class='bi bi-chevron-left'></i> Prev";
+                    prevBtn.disabled = (this.currentPage === 1);
+                    prevBtn.addEventListener("click", () => this.goToPage(this.currentPage - 1));
+                    this.navEl.appendChild(prevBtn);
+
+                    let startPage = Math.max(1, this.currentPage - 2);
+                    let endPage = Math.min(totalPages, startPage + 4);
+                    if (endPage - startPage < 4) {
+                        startPage = Math.max(1, endPage - 4);
+                    }
+
+                    for (let i = startPage; i <= endPage; i++) {
+                        const pageBtn = document.createElement("button");
+                        pageBtn.type = "button";
+                        pageBtn.className = "btn-page-step" + (i === this.currentPage ? " active" : "");
+                        pageBtn.textContent = i;
+                        pageBtn.addEventListener("click", () => this.goToPage(i));
+                        this.navEl.appendChild(pageBtn);
+                    }
+
+                    const nextBtn = document.createElement("button");
+                    nextBtn.type = "button";
+                    nextBtn.className = "btn-page-step";
+                    nextBtn.innerHTML = "Next <i class='bi bi-chevron-right'></i>";
+                    nextBtn.disabled = (this.currentPage === totalPages);
+                    nextBtn.addEventListener("click", () => this.goToPage(this.currentPage + 1));
+                    this.navEl.appendChild(nextBtn);
+                }
+            }
+        }
+    }
+
+    window.paginatorAset = new AdminTablePaginator({
+        tbodyId: "tbodyAset",
+        infoId: "infoAset",
+        navId: "navAset",
+        pageSizeId: "pageSizeAset",
+        searchId: "searchAset",
+        mulaiId: "filterMulaiAset",
+        sampaiId: "filterSampaiAset",
+        kondisiId: "filterKondisiAset",
+        resetId: "btnResetAset"
+    });
+});
+</script>
+
+<%- include("partials/footer") %>

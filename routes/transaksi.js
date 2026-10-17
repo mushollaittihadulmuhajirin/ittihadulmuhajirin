@@ -10,13 +10,11 @@ const db = require("../config/db");
 ====================================================== */
 
 function checkLogin(req, res, next) {
-
-    if (!req.session.user) {
-        return res.redirect("/");
+    if (!req.session || !req.session.user) {
+        return res.redirect("/login");
     }
 
     next();
-
 }
 
 /* ======================================================
@@ -224,7 +222,9 @@ router.get("/edit-inventaris/:id", checkLogin, (req, res) => {
                     res.render("aset_edit", {
 
                         data: rows[0],
-                        kategori
+                        kategori,
+                        actionUrl: `/transaksi/update-inventaris/${rows[0].id}`,
+                        backUrl: "/transaksi"
 
                     });
 

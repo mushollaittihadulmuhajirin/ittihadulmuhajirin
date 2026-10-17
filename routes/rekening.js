@@ -8,13 +8,10 @@ const db = require("../config/db");
 ========================================================== */
 
 function checkLogin(req, res, next) {
-
-    if (!req.session.user) {
-        return res.redirect("/login");
+    if (req.session && req.session.user) {
+        return next();
     }
-
-    next();
-
+    return res.redirect("/login");
 }
 
 /* ==========================================================

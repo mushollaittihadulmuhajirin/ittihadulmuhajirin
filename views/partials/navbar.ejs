@@ -1,94 +1,112 @@
-<nav class="navbar navbar-expand-lg navbar-dark bg-success shadow">
+<nav class="navbar navbar-expand-xl navbar-dark admin-navbar sticky-top">
+    <div class="container-fluid px-3 px-lg-4">
+        <a class="navbar-brand fw-bold d-inline-flex align-items-center gap-2" href="/dashboard">
+            <img src="/images/hero/logo-dkm-muhajirin.png" alt="Logo Masjid Ittihadul Muhajirin" class="admin-nav-logo">
+            <span>DKM Crystal</span>
+            <small class="d-none d-sm-inline-block">Admin cPanel</small>
+        </a>
 
-<div class="container-fluid">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#adminNavbarContent" aria-controls="adminNavbarContent" aria-expanded="false" aria-label="Toggle navigasi">
+            <span class="navbar-toggler-icon"></span>
+        </button>
 
-    <a class="navbar-brand fw-bold" href="/dashboard">
-        🕌 DKM Crystal
-    </a>
+        <div class="collapse navbar-collapse" id="adminNavbarContent">
+            <ul class="navbar-nav me-auto mb-2 mb-xl-0 gap-1 pt-2 pt-xl-0">
+                <li class="nav-item">
+                    <a class="nav-link" href="/dashboard">
+                        <i class="bi bi-speedometer2"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/transaksi">
+                        <i class="bi bi-cash-stack"></i> Transaksi
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/aset">
+                        <i class="bi bi-box-seam"></i> Inventaris
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/rekening">
+                        <i class="bi bi-bank"></i> Rekening
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/pengaturan-donasi">
+                        <i class="bi bi-qr-code-scan"></i> QRIS
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/saran">
+                        <i class="bi bi-chat-heart"></i> Saran Warga
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/master-blok">
+                        <i class="bi bi-grid-3x3-gap"></i> Master Blok
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/kategori">
+                        <i class="bi bi-tags"></i> Kategori
+                    </a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-shield-lock"></i> Sistem
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-dark shadow border-0" style="background-color: #064e3b;">
+                        <li>
+                            <a class="dropdown-item py-2" href="/backup">
+                                <i class="bi bi-database-down me-2 text-info"></i> Backup Database
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item py-2" href="/restore">
+                                <i class="bi bi-database-up me-2 text-warning"></i> Restore Database
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item py-2" href="/auth/ubah-password">
+                                <i class="bi bi-key me-2 text-light"></i> Ubah Password
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
 
-    <ul class="navbar-nav ms-auto flex-row flex-wrap align-items-center">
-
-        <!-- ========================= -->
-        <!-- MENU DESKTOP SAJA -->
-        <!-- ========================= -->
-
-        <li class="nav-item d-none d-lg-block">
-            <a class="nav-link" href="/dashboard">
-                Dashboard
-            </a>
-        </li>
-
-        <li class="nav-item d-none d-lg-block">
-            <a class="nav-link" href="/transaksi">
-                Transaksi
-            </a>
-        </li>
-
-        <li class="nav-item d-none d-lg-block">
-            <a class="nav-link" href="/aset">
-                Inventaris
-            </a>
-        </li>
-
-        <li class="nav-item d-none d-lg-block">
-            <a class="nav-link" href="/laporan">
-                Laporan
-            </a>
-        </li>
-
-        <li class="nav-item d-none d-lg-block">
-            <a
-                class="nav-link text-warning"
-                target="_blank"
-                href="https://drive.google.com/">
-                Laporan Lama
-            </a>
-        </li>
-
-      <!-- ========================= -->
-<!-- MENU DESKTOP + HP -->
-<!-- ========================= -->
-
-<li class="nav-item">
-    <a class="nav-link" href="/rekening">
-        Rekening
-    </a>
-</li>
-
-<li class="nav-item">
-    <a class="nav-link" href="/kategori">
-        Kategori
-    </a>
-</li>
-
-<li class="nav-item">
-    <a class="nav-link" href="/backup">
-        Backup
-    </a>
-</li>
-
-<li class="nav-item">
-    <a class="nav-link" href="/restore">
-        Restore
-    </a>
-</li>
-
-<li class="nav-item">
-    <a class="nav-link" href="/auth/ubah-password">
-        Password
-    </a>
-</li>
-
-<li class="nav-item">
-    <a class="nav-link text-danger" href="/login/logout">
-        Logout
-    </a>
-</li>
-
-    </ul>
-
-</div>
-
+            <ul class="navbar-nav ms-auto mb-2 mb-xl-0 gap-1 align-items-xl-center">
+                <li class="nav-item">
+                    <a class="nav-link text-warning-emphasis text-nowrap" href="/laporan" target="_blank" title="Buka Halaman Laporan Publik">
+                        <i class="bi bi-box-arrow-up-right"></i> <span>Laporan Publik</span>
+                    </a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle text-nowrap d-flex align-items-center gap-1" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-person-circle fs-6"></i> <span>Admin</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark shadow border-0" style="background-color: #064e3b; min-width: 190px;">
+                        <li class="px-3 py-2 border-bottom border-secondary-subtle">
+                            <div class="small text-white-50">Masuk sebagai:</div>
+                            <div class="fw-bold text-white small">Pengurus DKM</div>
+                        </li>
+                        <li>
+                            <a class="dropdown-item py-2" href="/auth/ubah-password">
+                                <i class="bi bi-key me-2 text-info"></i> Ubah Password
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider my-1 border-secondary-subtle"></li>
+                        <li>
+                            <a class="dropdown-item py-2 text-danger-emphasis" href="/login/logout" onclick="return confirm('Keluar dari panel admin DKM Crystal?')">
+                                <i class="bi bi-box-arrow-right me-2 text-danger"></i> Logout
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
 </nav>
 
-<div class="container mt-4">
+<div class="admin-main-container">

@@ -7,14 +7,17 @@
 
         <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
 
-            <h4 class="mb-0">💾 Backup Database</h4>
+            <div class="d-flex align-items-center gap-2">
+                <h4 class="mb-0">💾 Backup Database</h4>
+                <span class="badge bg-light text-dark border ms-2">
+                    Database: <%= typeof dbName !== 'undefined' ? dbName : 'dkm_crystal_local_test' %>
+                </span>
+            </div>
 
             <button
                 class="btn btn-light btn-sm"
                 onclick="loadBackupList()">
-
                 🔄 Refresh
-
             </button>
 
         </div>
@@ -22,59 +25,66 @@
         <div class="card-body">
 
             <p class="text-muted">
-                Backup database Railway ke Supabase Storage.
+                Cadangkan seluruh struktur dan data database DKM Crystal (transaksi, donasi barang, inventaris aset, master blok, saran warga, kategori, dan rekening).
             </p>
 
-            <button
-                id="btnBackup"
-                class="btn btn-success">
+            <div class="d-flex align-items-center flex-wrap gap-2 mb-3">
+                <button
+                    id="btnBackup"
+                    class="btn btn-success fw-semibold">
+                    💾 Buat Backup Sekarang
+                </button>
 
-                💾 Backup Sekarang
-
-            </button>
-
-            <span
-                id="backupStatus"
-                class="ms-3 fw-bold">
-            </span>
+                <span
+                    id="backupStatus"
+                    class="ms-2 fw-bold">
+                </span>
+            </div>
 
             <hr>
 
-            <h5>Riwayat Backup</h5>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0">📁 Riwayat Berkas Backup</h5>
+                <small class="text-muted">Tersimpan di direktori lokal &amp; cloud storage</small>
+            </div>
 
-            <table class="table table-bordered table-hover">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover align-middle">
 
-                <thead class="table-light">
+                    <thead class="table-light">
 
-                    <tr>
+                        <tr>
 
-                        <th>Nama File</th>
+                            <th>Nama File</th>
 
-                        <th>Ukuran</th>
+                            <th>Ukuran</th>
 
-                        <th>Dibuat</th>
+                            <th>Penyimpanan</th>
 
-                        <th width="180">Aksi</th>
+                            <th>Waktu Pembuatan</th>
 
-                    </tr>
+                            <th width="160" class="text-center">Aksi</th>
 
-                </thead>
+                        </tr>
 
-                <tbody id="backupTable">
+                    </thead>
 
-                    <tr>
+                    <tbody id="backupTable">
 
-                        <td colspan="4" class="text-center">
+                        <tr>
 
-                            Memuat data...
+                            <td colspan="5" class="text-center text-muted py-4">
 
-                        </td>
+                                Memuat daftar backup...
 
-                    </tr>
+                            </td>
 
-                </tbody>
+                        </tr>
 
-            </table>
+                    </tbody>
+
+                </table>
+            </div>
 
         </div>
 
@@ -96,23 +106,23 @@ async function loadBackupList(){
 
     table.innerHTML = `
         <tr>
-            <td colspan="4" class="text-center">
-                Memuat data...
+            <td colspan="5" class="text-center text-muted py-4">
+                <span class="spinner-border spinner-border-sm me-2"></span> Memuat data...
             </td>
         </tr>
     `;
 
     try{
 
-        const response = await fetch("/backup/list");
+        const response = await fetch("/backup/list" + window.location.search);
         const result = await response.json();
 
         if(!result.success){
 
             table.innerHTML = `
                 <tr>
-                    <td colspan="4" class="text-danger text-center">
-                        ${result.message}
+                    <td colspan="5" class="text-danger text-center py-4">
+                        ❌ ${result.message}
                     </td>
                 </tr>
             `;
@@ -121,12 +131,12 @@ async function loadBackupList(){
 
         }
 
-        if(result.files.length===0){
+        if(!result.files || result.files.length === 0){
 
             table.innerHTML = `
                 <tr>
-                    <td colspan="4" class="text-center">
-                        Belum ada backup
+                    <td colspan="5" class="text-center text-muted py-4">
+                        Belum ada file backup tersedia. Silakan klik tombol "Buat Backup Sekarang".
                     </td>
                 </tr>
             `;
@@ -139,33 +149,33 @@ async function loadBackupList(){
 
         result.files.forEach(file=>{
 
-            const size =
-                file.metadata && file.metadata.size
-                ? Math.round(file.metadata.size/1024)+" KB"
-                : "-";
+            const rawSize = file.metadata && file.metadata.size ? file.metadata.size : 0;
+            const size = rawSize > 0 ? (rawSize > 1024 * 1024 ? (rawSize / (1024 * 1024)).toFixed(2) + " MB" : Math.round(rawSize / 1024) + " KB") : "-";
 
-            const created =
-                file.created_at
-                ? new Date(file.created_at).toLocaleString()
-                : "-";
+            const created = file.created_at ? new Date(file.created_at).toLocaleString("id-ID") : "-";
+            const sourceBadge = file.source === "local" 
+                ? '<span class="badge bg-secondary">📁 Lokal</span>' 
+                : '<span class="badge bg-info text-dark">☁️ Cloud</span>';
 
             table.innerHTML += `
 
                 <tr>
 
-                    <td>${file.name}</td>
+                    <td><strong>${file.name}</strong></td>
 
                     <td>${size}</td>
 
+                    <td>${sourceBadge}</td>
+
                     <td>${created}</td>
 
-                    <td>
+                    <td class="text-center">
 
                         <button
                             class="btn btn-primary btn-sm"
                             onclick="downloadBackup('${file.name}')">
 
-                            ⬇ Download
+                            ⬇ Unduh SQL
 
                         </button>
 
@@ -183,8 +193,8 @@ async function loadBackupList(){
 
         table.innerHTML = `
             <tr>
-                <td colspan="4" class="text-danger text-center">
-                    ${err.message}
+                <td colspan="5" class="text-danger text-center py-4">
+                    ❌ ${err.message}
                 </td>
             </tr>
         `;
@@ -194,24 +204,24 @@ async function loadBackupList(){
 }
 
 // =======================
-// BACKUP DATABASE
+// BACKUP DATABASE SEKARANG
 // =======================
 
 btn.addEventListener("click", async ()=>{
 
     btn.disabled = true;
 
-    btn.innerHTML = "⏳ Sedang Backup...";
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Menjalankan Backup...';
 
-    status.className = "ms-3 text-primary fw-bold";
+    status.className = "ms-2 text-primary fw-bold";
 
-    status.innerHTML = "Membuat backup...";
+    status.innerHTML = "Memproses dump database...";
 
     try{
 
-        const response = await fetch("/backup/now",{
+        const response = await fetch("/backup/now" + window.location.search, {
 
-            method:"POST"
+            method: "POST"
 
         });
 
@@ -219,11 +229,11 @@ btn.addEventListener("click", async ()=>{
 
         if(result.success){
 
-            status.className="ms-3 text-success fw-bold";
+            status.className = "ms-2 text-success fw-bold";
 
-            status.innerHTML="✅ "+result.fileName;
+            status.innerHTML = "✅ Selesai: " + result.fileName;
 
-            alert("Backup database berhasil.");
+            alert("Backup database berhasil dibuat: " + result.fileName);
 
             await loadBackupList();
 
@@ -231,9 +241,9 @@ btn.addEventListener("click", async ()=>{
 
         else{
 
-            status.className="ms-3 text-danger fw-bold";
+            status.className = "ms-2 text-danger fw-bold";
 
-            status.innerHTML="❌ Gagal";
+            status.innerHTML = "❌ Gagal";
 
             alert(result.message);
 
@@ -243,17 +253,17 @@ btn.addEventListener("click", async ()=>{
 
     catch(err){
 
-        status.className="ms-3 text-danger fw-bold";
+        status.className = "ms-2 text-danger fw-bold";
 
-        status.innerHTML="❌ Error";
+        status.innerHTML = "❌ Error";
 
         alert(err.message);
 
     }
 
-    btn.disabled=false;
+    btn.disabled = false;
 
-    btn.innerHTML="💾 Backup Sekarang";
+    btn.innerHTML = "💾 Buat Backup Sekarang";
 
 });
 
@@ -266,7 +276,8 @@ async function downloadBackup(fileName){
     try{
 
         const response = await fetch(
-            "/backup/download/" + encodeURIComponent(fileName)
+            "/backup/download/" + encodeURIComponent(fileName) + window.location.search,
+            { headers: { "Accept": "application/json" } }
         );
 
         const result = await response.json();
@@ -278,20 +289,21 @@ async function downloadBackup(fileName){
 
         }
 
-        window.open(result.url,"_blank");
+        // Buka download URL
+        window.location.href = result.url;
 
     }
 
     catch(err){
 
-        alert(err.message);
+        // Fallback langsung ke URL unduhan
+        window.location.href = "/backup/download/" + encodeURIComponent(fileName) + window.location.search;
 
     }
 
 }
 
-// =======================
-
+// Muat daftar saat halaman dibuka
 loadBackupList();
 
 </script>

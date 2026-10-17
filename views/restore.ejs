@@ -5,27 +5,37 @@
 
     <div class="card shadow">
 
-        <div class="card-header bg-danger text-white">
+        <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
 
-            <h4 class="mb-0">
-                ♻ Restore Database
-            </h4>
+            <div class="d-flex align-items-center gap-2">
+                <h4 class="mb-0">
+                    ♻ Restore Database
+                </h4>
+                <span class="badge bg-light text-dark border ms-2">
+                    Target: <%= typeof dbName !== 'undefined' ? dbName : 'dkm_crystal_local_test' %>
+                </span>
+            </div>
+
+            <a href="/backup" class="btn btn-light btn-sm fw-semibold">
+                💾 Buka Halaman Backup
+            </a>
 
         </div>
 
         <div class="card-body">
 
-            <div class="alert alert-warning">
+            <div class="alert alert-warning border-warning">
 
-                <strong>Perhatian!</strong>
+                <h5 class="alert-heading fw-bold">⚠️ Perhatian Khusus Sebelum Pemulihan!</h5>
 
                 <hr>
 
                 <ul class="mb-0">
-                    <li>Backup otomatis akan dibuat sebelum restore.</li>
-                    <li>Database saat ini akan diganti dengan isi file backup.</li>
-                    <li>Pastikan file yang dipilih adalah file backup (.sql).</li>
-                    <li>Proses restore tidak dapat dibatalkan.</li>
+                    <li><strong>Target Database Pemulihan:</strong> <code class="text-danger fw-bold fs-6"><%= typeof dbName !== 'undefined' ? dbName : 'dkm_crystal_local_test' %></code></li>
+                    <li>Seluruh tabel dan data pada database target akan <strong>ditimpa dan digantikan</strong> dengan isi file backup.</li>
+                    <li>Sistem akan secara otomatis membuat <strong>salinan backup keselamatan (safety backup)</strong> sesaat sebelum pemulihan dimulai.</li>
+                    <li>Pastikan file yang dipilih adalah berkas SQL valid (<code>.sql</code>) dengan ukuran maksimal 50 MB.</li>
+                    <li>Proses restore tidak dapat dibatalkan setelah eksekusi dimulai.</li>
                 </ul>
 
             </div>
@@ -34,34 +44,51 @@
 
                 <div class="mb-3">
 
-                    <label class="form-label">
-                        File Backup (.sql)
+                    <label class="form-label fw-bold">
+                        Pilih Berkas Backup (.sql)
                     </label>
 
                     <input
                         type="file"
-                        class="form-control"
+                        class="form-control form-control-lg"
                         id="backupFile"
                         name="backupFile"
                         accept=".sql"
                         required>
 
+                    <div id="fileInfoBox" class="mt-2 text-muted small d-none">
+                        <i class="bi bi-file-earmark-code"></i> Berkas dipilih: <span id="infoFileName" class="fw-bold"></span> 
+                        (<span id="infoFileSize"></span>) &bull; Terakhir diubah: <span id="infoFileDate"></span>
+                    </div>
+
+                </div>
+
+                <div class="p-3 bg-light rounded border mb-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <span class="small text-muted d-block">Database Tujuan Pemulihan:</span>
+                            <span class="fw-bold text-dark fs-5">
+                                🗄️ <%= typeof dbName !== 'undefined' ? dbName : 'dkm_crystal_local_test' %>
+                            </span>
+                        </div>
+                        <div class="col-md-4 text-md-end mt-2 mt-md-0">
+                            <span class="badge bg-danger p-2">Operasi Destruktif Terhadap Target</span>
+                        </div>
+                    </div>
                 </div>
 
                 <button
                     type="submit"
                     id="btnRestore"
-                    class="btn btn-danger">
-
-                    ♻ Restore Database
-
+                    class="btn btn-danger btn-lg fw-bold">
+                    ♻ Mulai Proses Restore Database
                 </button>
 
             </form>
 
             <div
                 id="restoreStatus"
-                class="alert mt-3 d-none">
+                class="alert mt-4 d-none">
             </div>
 
         </div>
@@ -76,54 +103,98 @@ const form = document.getElementById("restoreForm");
 const btn = document.getElementById("btnRestore");
 const statusBox = document.getElementById("restoreStatus");
 const inputFile = document.getElementById("backupFile");
+const fileInfoBox = document.getElementById("fileInfoBox");
+const infoFileName = document.getElementById("infoFileName");
+const infoFileSize = document.getElementById("infoFileSize");
+const infoFileDate = document.getElementById("infoFileDate");
+
+const targetDbName = "<%= typeof dbName !== 'undefined' ? dbName : 'dkm_crystal_local_test' %>";
+
+// Deteksi pemilihan file
+inputFile.addEventListener("change", function() {
+    if (this.files && this.files.length > 0) {
+        const file = this.files[0];
+        infoFileName.textContent = file.name;
+        
+        const sizeKb = Math.round(file.size / 1024);
+        infoFileSize.textContent = sizeKb > 1024 
+            ? (sizeKb / 1024).toFixed(2) + " MB" 
+            : sizeKb + " KB";
+            
+        infoFileDate.textContent = file.lastModified 
+            ? new Date(file.lastModified).toLocaleString("id-ID") 
+            : "-";
+            
+        fileInfoBox.classList.remove("d-none");
+    } else {
+        fileInfoBox.classList.add("d-none");
+    }
+});
 
 form.addEventListener("submit", async function (e) {
 
     e.preventDefault();
 
     if (inputFile.files.length === 0) {
-
         alert("Silakan pilih file backup (.sql).");
         return;
-
     }
 
     const file = inputFile.files[0];
 
     if (!file.name.toLowerCase().endsWith(".sql")) {
-
         alert("File harus berekstensi .sql");
         return;
-
     }
 
-    const confirmRestore = confirm(
-`Yakin ingin melakukan Restore Database?
+    if (file.size === 0) {
+        alert("File yang dipilih kosong (0 bytes). Silakan pilih berkas backup yang sah.");
+        return;
+    }
 
-• Database saat ini akan diganti.
-• Backup otomatis akan dibuat terlebih dahulu.
-• Proses ini tidak dapat dibatalkan.`
-    );
+    const confirmMessage = 
+`==============================================
+⚠️ KONFIRMASI PEMULIHAN DATABASE
+==============================================
+Nama Berkas: ${file.name}
+Ukuran: ${Math.round(file.size / 1024)} KB
+Target Database: ${targetDbName}
+==============================================
+PERINGATAN:
+1. Seluruh data pada database '${targetDbName}' akan digantikan.
+2. Salinan keselamatan otomatis akan dibuat terlebih dahulu.
+3. Proses ini TIDAK DAPAT dibatalkan.
+
+Apakah Anda yakin ingin melanjutkan proses restore?`;
+
+    const confirmRestore = confirm(confirmMessage);
 
     if (!confirmRestore) {
         return;
     }
 
     btn.disabled = true;
-    btn.innerHTML = "⏳ Sedang Restore...";
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Memulihkan Database...';
 
-    statusBox.className = "alert alert-info mt-3";
-    statusBox.innerHTML = "Mohon tunggu, proses restore sedang berjalan...";
+    statusBox.className = "alert alert-info mt-4";
+    statusBox.innerHTML = `
+        <div class="d-flex align-items-center">
+            <span class="spinner-border spinner-border-sm me-3" role="status"></span>
+            <div>
+                <strong>Proses Restore Sedang Berjalan...</strong><br>
+                <small class="text-muted">Membuat safety backup, membersihkan tabel lama, dan mengimpor data ke \`${targetDbName}\`.</small>
+            </div>
+        </div>
+    `;
+    statusBox.classList.remove("d-none");
 
     try {
 
         const formData = new FormData(form);
 
-        const response = await fetch("/restore/process", {
-
+        const response = await fetch("/restore/process" + window.location.search, {
             method: "POST",
             body: formData
-
         });
 
         const result = await response.json();
@@ -132,25 +203,29 @@ form.addEventListener("submit", async function (e) {
             throw new Error(result.message);
         }
 
-        statusBox.className = "alert alert-success mt-3";
-        statusBox.innerHTML =
-            "✅ Restore database berhasil. Halaman akan dialihkan...";
-
-        setTimeout(() => {
-
-            window.location.href = "/dashboard";
-
-        }, 2000);
+        statusBox.className = "alert alert-success mt-4";
+        statusBox.innerHTML = `
+            <h5>✅ Restore Database Berhasil!</h5>
+            <p class="mb-1">${result.message}</p>
+            <small class="text-muted">Target database: <strong>${result.targetDatabase}</strong> &bull; Total tabel dipulihkan: <strong>${result.tableCount || '-'}</strong></small>
+            <div class="mt-2">
+                <a href="/transaksi" class="btn btn-sm btn-success me-2">Ke Transaksi</a>
+                <a href="/dashboard" class="btn btn-sm btn-primary">Ke Dashboard</a>
+            </div>
+        `;
 
     } catch (err) {
 
-        statusBox.className = "alert alert-danger mt-3";
-        statusBox.innerHTML = "❌ " + err.message;
+        statusBox.className = "alert alert-danger mt-4";
+        statusBox.innerHTML = `
+            <h5>❌ Pemulihan Gagal!</h5>
+            <p class="mb-0">${err.message}</p>
+        `;
 
     } finally {
 
         btn.disabled = false;
-        btn.innerHTML = "♻ Restore Database";
+        btn.innerHTML = "♻ Mulai Proses Restore Database";
 
     }
 

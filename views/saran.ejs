@@ -1,0 +1,203 @@
+<%- include("partials/header", { title: "Saran & Masukan Warga — DKM Crystal" }) %>
+<%- include("partials/navbar") %>
+
+<div class="admin-page-header">
+    <div>
+        <h1 class="admin-page-title">
+            <i class="bi bi-chat-heart-fill text-success"></i> Saran &amp; Masukan Warga
+        </h1>
+        <div class="admin-page-subtitle">
+            <span>Kelola aspirasi warga terverifikasi berdasarkan master blok perumahan</span>
+        </div>
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+        <a href="/master-blok" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-grid-3x3-gap"></i> Kelola Master Blok
+        </a>
+        <a href="/dashboard" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-speedometer2"></i> Dashboard
+        </a>
+    </div>
+</div>
+
+<% if (typeof successMsg !== 'undefined' && successMsg) { %>
+<div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+    <i class="bi bi-check-circle-fill me-2"></i> <%= successMsg %>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+<% } %>
+
+<!-- RINGKASAN STATISTIK -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+        <div class="card shadow-sm border-0 rounded-4 p-3 mb-0 h-100">
+            <div class="text-muted small fw-semibold text-uppercase">Total Masukan</div>
+            <div class="fs-2 fw-bold text-dark my-1"><%= stats.totalSaran %></div>
+            <div class="text-secondary small">Seluruh data tercatat</div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="card shadow-sm border-0 rounded-4 p-3 mb-0 h-100 border-start border-warning border-4">
+            <div class="text-warning-emphasis small fw-semibold text-uppercase">Belum Dibaca</div>
+            <div class="fs-2 fw-bold text-warning my-1"><%= stats.saranBaru %></div>
+            <div class="text-muted small">Status: Baru</div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="card shadow-sm border-0 rounded-4 p-3 mb-0 h-100 border-start border-primary border-4">
+            <div class="text-primary small fw-semibold text-uppercase">Sedang Ditinjau</div>
+            <div class="fs-2 fw-bold text-primary my-1"><%= stats.saranDibaca %></div>
+            <div class="text-muted small">Status: Dibaca</div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="card shadow-sm border-0 rounded-4 p-3 mb-0 h-100 border-start border-success border-4">
+            <div class="text-success small fw-semibold text-uppercase">Selesai / Ditindak</div>
+            <div class="fs-2 fw-bold text-success my-1"><%= stats.saranSelesai %></div>
+            <div class="text-muted small">Status: Selesai</div>
+        </div>
+    </div>
+</div>
+
+<!-- FILTER BAR -->
+<div class="card shadow-sm border-0 rounded-4 mb-4">
+    <div class="card-body p-3">
+        <form method="GET" action="/saran" class="row g-2 align-items-center">
+            <div class="col-12 col-md-3">
+                <label class="form-label small fw-semibold text-secondary mb-1">Filter Blok</label>
+                <select name="blok" class="form-select form-select-sm">
+                    <option value="">-- Semua Blok Resmi --</option>
+                    <% if (Array.isArray(listBlok)) { %>
+                        <% listBlok.forEach(function(b) { %>
+                            <option value="<%= b %>" <%= (filterBlok === b) ? 'selected' : '' %>><%= b %></option>
+                        <% }); %>
+                    <% } %>
+                </select>
+            </div>
+            <div class="col-12 col-md-3">
+                <label class="form-label small fw-semibold text-secondary mb-1">Filter Kategori</label>
+                <select name="kategori" class="form-select form-select-sm">
+                    <option value="">-- Semua Kategori --</option>
+                    <% if (Array.isArray(kategoriList)) { %>
+                        <% kategoriList.forEach(function(k) { %>
+                            <option value="<%= k %>" <%= (filterKategori === k) ? 'selected' : '' %>><%= k %></option>
+                        <% }); %>
+                    <% } %>
+                </select>
+            </div>
+            <div class="col-12 col-md-3">
+                <label class="form-label small fw-semibold text-secondary mb-1">Filter Status</label>
+                <select name="status" class="form-select form-select-sm">
+                    <option value="">-- Semua Status --</option>
+                    <option value="baru" <%= (filterStatus === 'baru') ? 'selected' : '' %>>Baru</option>
+                    <option value="dibaca" <%= (filterStatus === 'dibaca') ? 'selected' : '' %>>Dibaca</option>
+                    <option value="selesai" <%= (filterStatus === 'selesai') ? 'selected' : '' %>>Selesai</option>
+                </select>
+            </div>
+            <div class="col-12 col-md-3 d-flex align-items-end gap-2 pt-md-3">
+                <button type="submit" class="btn btn-success btn-sm flex-fill fw-semibold">
+                    <i class="bi bi-funnel"></i> Terapkan
+                </button>
+                <a href="/saran" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-arrow-counterclockwise"></i> Reset
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- TABEL DATA MASUKAN -->
+<div class="card shadow-sm border-0 rounded-4">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom" style="border-radius: 16px 16px 0 0;">
+        <h5 class="mb-0 fw-bold fs-6 text-dark"><i class="bi bi-chat-left-text text-success me-2"></i>Daftar Saran &amp; Masukan Warga</h5>
+        <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
+            <%= (listSaran && listSaran.length) ? listSaran.length : 0 %> Masukan
+        </span>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr class="small text-muted text-uppercase">
+                    <th style="width: 50px;" class="text-center">No</th>
+                    <th style="width: 140px;">Waktu</th>
+                    <th style="width: 160px;">Nama Warga</th>
+                    <th style="width: 90px;" class="text-center">Blok</th>
+                    <th style="width: 150px;">Kategori</th>
+                    <th>Pesan / Masukan</th>
+                    <th style="width: 110px;" class="text-center">Status</th>
+                    <th style="width: 120px;" class="text-center">Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (!listSaran || listSaran.length === 0) { %>
+                <tr>
+                    <td colspan="8" class="text-center py-5 text-muted">
+                        <i class="bi bi-inbox fs-2 d-block mb-2 text-secondary"></i>
+                        Belum ada data saran &amp; masukan yang sesuai dengan filter.
+                    </td>
+                </tr>
+                <% } else { %>
+                    <% listSaran.forEach(function(item, idx) { %>
+                    <tr>
+                        <td class="text-center text-muted fw-semibold small"><%= idx + 1 %></td>
+                        <td class="small">
+                            <span class="fw-semibold text-dark"><%= new Date(item.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) %></span><br>
+                            <span class="text-muted" style="font-size: 0.75rem;"><%= new Date(item.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) %></span>
+                        </td>
+                        <td class="fw-bold text-dark"><%= item.nama %></td>
+                        <td class="text-center">
+                            <span class="font-monospace fw-bold px-2 py-1 bg-dark text-white rounded small"><%= item.blok %></span>
+                        </td>
+                        <td>
+                            <span class="badge bg-light text-dark border"><%= item.kategori %></span>
+                        </td>
+                        <td>
+                            <div class="text-break" style="white-space: pre-wrap; font-size: 0.85rem;"><%= item.pesan %></div>
+                        </td>
+                        <td class="text-center">
+                            <% if (item.status === 'baru') { %>
+                                <span class="badge bg-warning text-dark"><i class="bi bi-bell"></i> Baru</span>
+                            <% } else if (item.status === 'dibaca') { %>
+                                <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle"><i class="bi bi-eye"></i> Dibaca</span>
+                            <% } else if (item.status === 'selesai') { %>
+                                <span class="badge bg-success-subtle text-success border border-success-subtle"><i class="bi bi-check2-circle"></i> Selesai</span>
+                            <% } else { %>
+                                <span class="badge bg-secondary"><%= item.status %></span>
+                            <% } %>
+                        </td>
+                        <td class="text-center">
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-light border dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Tindakan
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                    <li>
+                                        <form method="POST" action="/saran/status/<%= item.id %>">
+                                            <input type="hidden" name="status" value="dibaca">
+                                            <button type="submit" class="dropdown-item small text-primary"><i class="bi bi-eye me-2"></i>Tandai Dibaca</button>
+                                        </form>
+                                    </li>
+                                    <li>
+                                        <form method="POST" action="/saran/status/<%= item.id %>">
+                                            <input type="hidden" name="status" value="selesai">
+                                            <button type="submit" class="dropdown-item small text-success"><i class="bi bi-check2-circle me-2"></i>Tandai Selesai</button>
+                                        </form>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <form method="POST" action="/saran/hapus/<%= item.id %>" onsubmit="return confirm('Hapus masukan dari <%= item.nama %>?');">
+                                            <button type="submit" class="dropdown-item small text-danger"><i class="bi bi-trash me-2"></i>Hapus</button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                    <% }); %>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<%- include("partials/footer") %>
